@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iTest · Design Variations</title>
+
+<script>
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+
+<style>
+  /* ============ TOKENS (Apple aesthetic) ============ */
+  :root {
+    --bg: #fbfbfd;
+    --surface: #ffffff;
+    --surface-2: #f5f5f7;
+    --text: #1d1d1f;
+    --muted: #86868b;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.14);
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.06);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.08);
+    --nav-bg: rgba(251, 251, 253, 0.72);
+  }
+  html.dark {
+    --bg: #000000;
+    --surface: #1d1d1f;
+    --surface-2: #161617;
+    --text: #f5f5f7;
+    --muted: #86868b;
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --accent: #2997ff;
+    --accent-hover: #47a7ff;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.3);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+    --nav-bg: rgba(0, 0, 0, 0.72);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color .3s ease, color .3s ease;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font: inherit; }
+
+  /* ============ GALLERY CHROME ============ */
+  .gallery-shell { max-width: 1280px; margin: 0 auto; padding: 80px 32px 160px; }
+  .gallery-intro { margin-bottom: 80px; max-width: 720px; }
+  .gallery-intro .eyebrow { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; font-weight: 500; }
+  .gallery-intro h1 { font-size: 56px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; margin: 0 0 20px; }
+  .gallery-intro p { font-size: 19px; color: var(--muted); line-height: 1.5; margin: 0; }
+
+  .module-group { margin: 0 0 96px; }
+  .module-group:last-child { margin-bottom: 0; }
+  .module-label {
+    display: flex; align-items: baseline; gap: 16px;
+    padding-bottom: 20px; margin-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .module-label .badge {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 4px 8px; border-radius: 6px; background: var(--surface-2);
+    letter-spacing: 0.04em;
+  }
+  .module-label h2 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+  .module-label .count { color: var(--muted); font-size: 14px; margin-left: auto; }
+
+  .variation { margin-bottom: 32px; }
+  .variation:last-child { margin-bottom: 0; }
+  .variation-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px; padding: 0 4px;
+  }
+  .variation-tag {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    color: var(--accent);
+    padding: 4px 10px; border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .variation-name { font-size: 15px; font-weight: 500; color: var(--text); }
+  .variation-desc { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .variation-preview {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--bg);
+    box-shadow: var(--shadow-md);
+  }
+  /* Inside-preview elements use absolute container width */
+  .variation-preview .preview-inner { position: relative; }
+
+  /* ============ FLOATING CONTROLS ============ */
+  .floating-controls {
+    position: fixed; top: 24px; right: 24px; z-index: 200;
+    display: flex; gap: 8px;
+  }
+  .ctrl-btn {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    border-radius: 999px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    transition: transform .15s ease;
+  }
+  .ctrl-btn:hover { transform: scale(1.05); }
+  .ctrl-btn svg { width: 16px; height: 16px; }
+
+  .jump-nav {
+    position: fixed; left: 24px; top: 50%; transform: translateY(-50%);
+    z-index: 200;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: var(--shadow-md);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .jump-nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 10px;
+    font-size: 12px; font-weight: 500;
+    color: var(--muted);
+    transition: background .15s ease, color .15s ease;
+    white-space: nowrap;
+  }
+  .jump-nav a:hover { background: var(--surface-2); color: var(--text); }
+  .jump-nav a .num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; opacity: .7;
+  }
+
+  @media (max-width: 1100px) {
+    .jump-nav { display: none; }
+  }
+
+  /* ============ SHARED PREVIEW UI ============ */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 22px;
+    border-radius: 980px;
+    background: var(--accent); color: white;
+    font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 22px;
+    border-radius: 980px;
+    background: transparent; color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+    transition: background .15s ease;
+  }
+  .btn-secondary:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--accent);
+    font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .btn-ghost:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .chevron { width: 12px; height: 12px; }
+
+  .mini-logo {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 600; letter-spacing: -0.01em;
+  }
+  .mini-logo .glyph {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: linear-gradient(140deg, #1d1d1f 0%, #424245 100%);
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-sm);
+  }
+  html.dark .mini-logo .glyph {
+    background: linear-gradient(140deg, #f5f5f7 0%, #c7c7cc 100%);
+  }
+  .mini-logo .glyph svg { width: 14px; height: 14px; }
+  .mini-logo .glyph svg path,
+  .mini-logo .glyph svg rect { stroke: white; }
+  html.dark .mini-logo .glyph svg path,
+  html.dark .mini-logo .glyph svg rect { stroke: #1d1d1f; }
+
+  /* ============ HEADER VARIATIONS ============ */
+  .hdr-base {
+    position: relative;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* Header A: minimal centered apple.com */
+  .hdr-A {
+    height: 56px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 32px;
+  }
+  .hdr-A .links {
+    display: flex; align-items: center; gap: 28px;
+    font-size: 13px; color: var(--text);
+  }
+  .hdr-A .links a { opacity: .85; transition: opacity .15s; }
+  .hdr-A .links a:hover { opacity: 1; }
+  .hdr-A .links .logo { font-weight: 600; }
+  .hdr-A .right { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); display: flex; gap: 8px; }
+  .hdr-A .icon-btn {
+    width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
+    color: var(--muted); transition: background .15s, color .15s;
+  }
+  .hdr-A .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+  /* Header B: floating pill */
+  .hdr-B-wrap {
+    padding: 16px 24px; display: flex; justify-content: center;
+    background: linear-gradient(180deg, var(--surface-2), var(--bg));
+  }
+  .hdr-B {
+    display: flex; align-items: center; gap: 4px;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--nav-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+  .hdr-B .pill-item {
+    padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    color: var(--text); transition: background .15s;
+  }
+  .hdr-B .pill-item:hover { background: var(--surface-2); }
+  .hdr-B .pill-item.active { background: var(--text); color: var(--bg); }
+  .hdr-B .sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+  .hdr-B .icon-pill {
+    width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center;
+    color: var(--muted); transition: background .15s, color .15s;
+  }
+  .hdr-B .icon-pill:hover { background: var(--surface-2); color: var(--text); }
+
+  /* Header C: command palette */
+  .hdr-C {
+    height: 60px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; gap: 24px;
+  }
+  .hdr-C .cmd {
+    flex: 1; max-width: 480px;
+    height: 36px; border-radius: 12px;
+    background: var(--surface-2);
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 12px;
+    color: var(--muted); font-size: 13px;
+    border: 1px solid transparent;
+    transition: border-color .15s, background .15s;
+    cursor: text;
+  }
+  .hdr-C .cmd:hover { border-color: var(--border-strong); }
+  .hdr-C .cmd kbd {
+    margin-left: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; padding: 2px 6px; border-radius: 4px;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .hdr-C .right { display: flex; align-items: center; gap: 8px; }
+  .hdr-C .right .status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+    padding: 0 10px;
+  }
+  .hdr-C .right .status .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #34c759;
+    box-shadow: 0 0 0 0 rgba(52,199,89,.5); animation: pulse 2.4s infinite;
+  }
+  .hdr-C .right .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #a1a1a6, #6e6e73);
+    color: white; font-size: 12px; font-weight: 600;
+    display: grid; place-items: center;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,199,89,.55); }
+    70%  { box-shadow: 0 0 0 6px rgba(52,199,89,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); }
+  }
+
+  /* ============ HERO VARIATIONS ============ */
+  .hero {
+    padding: 96px 32px;
+    text-align: center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero .eyebrow {
+    font-size: 13px; font-weight: 500; color: var(--accent);
+    letter-spacing: -0.01em; margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 600; letter-spacing: -0.035em;
+    line-height: 1.02; margin: 0 0 24px;
+    max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, #0071e3 0%, #5e5ce6 50%, #af52de 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  html.dark .hero h1 .grad {
+    background: linear-gradient(120deg, #2997ff 0%, #5e5ce6 50%, #bf5af2 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.sub {
+    font-size: clamp(18px, 1.6vw, 21px);
+    color: var(--muted); line-height: 1.4;
+    max-width: 640px; margin: 0 auto 36px;
+  }
+  .hero .actions { display: inline-flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+  /* Hero B: asymmetric with floating window */
+  .hero-B {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center;
+    padding: 96px 56px;
+    text-align: left;
+  }
+  .hero-B h1 { text-align: left; margin: 0 0 20px; font-size: clamp(40px, 4.5vw, 60px); letter-spacing: -0.03em; line-height: 1.05; }
+  .hero-B p.sub { text-align: left; margin: 0 0 32px; font-size: 18px; max-width: none; }
+  .hero-B .actions { justify-content: flex-start; }
+  .hero-B .window {
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transform: perspective(1400px) rotateY(-6deg) rotateX(2deg);
+    transition: transform .4s ease;
+  }
+  .hero-B .window:hover { transform: perspective(1400px) rotateY(-3deg) rotateX(1deg); }
+  .hero-B .window .titlebar {
+    height: 32px; background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px; padding: 0 12px;
+  }
+  .hero-B .window .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .hero-B .window .dot.r { background: #ff5f57; }
+  .hero-B .window .dot.y { background: #ffbd2e; }
+  .hero-B .window .dot.g { background: #28c840; }
+  .hero-B .window .titlebar .title {
+    font-size: 11px; color: var(--muted); margin-left: auto; font-family: ui-monospace, "SF Mono", monospace;
+  }
+  .hero-B .window .body { padding: 24px; }
+  .hero-B .window .row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; font-size: 12px; }
+  .hero-B .window .label { font-family: ui-monospace, "SF Mono", monospace; color: var(--muted); width: 90px; font-size: 11px; }
+  .hero-B .window .bar { flex: 1; height: 6px; border-radius: 3px; background: var(--surface-2); position: relative; overflow: hidden; }
+  .hero-B .window .bar::after {
+    content: ''; position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), #5e5ce6);
+  }
+  .hero-B .window .bar.w70::after { width: 70%; }
+  .hero-B .window .bar.w42::after { width: 42%; }
+  .hero-B .window .bar.w88::after { width: 88%; }
+  .hero-B .window .bar.w55::after { width: 55%; }
+  .hero-B .window .grid-mini {
+    margin-top: 18px;
+    display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px;
+  }
+  .hero-B .window .grid-mini span {
+    aspect-ratio: 1; border-radius: 2px;
+    background: var(--surface-2);
+  }
+  .hero-B .window .grid-mini span.on { background: var(--accent); opacity: .85; }
+  .hero-B .window .grid-mini span.warn { background: #ff9500; }
+
+  /* Hero C: with capability pills */
+  .hero-C { padding: 88px 32px 80px; text-align: center; }
+  .hero-C .pills {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    max-width: 760px; margin: 32px auto 36px;
+  }
+  .hero-C .pill {
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 13px; color: var(--text); font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color .15s, background .15s;
+  }
+  .hero-C .pill:hover { border-color: var(--border-strong); }
+  .hero-C .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* ============ CORE MODULES VARIATIONS ============ */
+  .modules-wrap { padding: 56px 32px; }
+  .modules-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .modules-head h2 {
+    font-size: 40px; font-weight: 600; letter-spacing: -0.025em;
+    margin: 0;
+  }
+  .modules-head .desc { color: var(--muted); font-size: 17px; margin: 8px 0 0; }
+  .modules-head .meta { font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; color: var(--muted); }
+
+  /* Modules A: App Store featured cards */
+  .grid-A {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .card-A {
+    border-radius: 28px;
+    padding: 28px;
+    min-height: 220px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: var(--text);
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .card-A:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .card-A .icon-tile {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-A .icon-tile svg { width: 24px; height: 24px; color: white; }
+  .card-A h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin: 16px 0 4px; }
+  .card-A p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.45; }
+  .card-A .open { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .card-A .open-label { font-size: 13px; color: var(--accent); font-weight: 500; }
+  .card-A .arrow { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; transition: transform .2s, background .2s; }
+  .card-A:hover .arrow { transform: translate(2px, -2px); background: var(--accent); color: white; }
+
+  .grad-1 { background: linear-gradient(140deg, #00b4d8, #0077b6); }
+  .grad-2 { background: linear-gradient(140deg, #ff9500, #ff6b00); }
+  .grad-3 { background: linear-gradient(140deg, #af52de, #5e5ce6); }
+  .grad-4 { background: linear-gradient(140deg, #34c759, #00a86b); }
+  .grad-5 { background: linear-gradient(140deg, #ff3b30, #ff2d55); }
+  .grad-6 { background: linear-gradient(140deg, #5856d6, #007aff); }
+  .grad-7 { background: linear-gradient(140deg, #424245, #1d1d1f); }
+  html.dark .grad-7 { background: linear-gradient(140deg, #6e6e73, #2a2a2c); }
+
+  /* "Collection" variant — EFA Tools entry card */
+  .card-A.collection {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+    padding: 28px 32px;
+    min-height: 0;
+  }
+  .card-A.collection .icon-tile { width: 60px; height: 60px; border-radius: 18px; flex-shrink: 0; }
+  .card-A.collection .icon-tile svg { width: 28px; height: 28px; }
+  .card-A.collection .text-block { flex: 1; min-width: 0; }
+  .card-A.collection h3 { font-size: 24px; margin: 0 0 4px; }
+  .card-A.collection p { font-size: 14px; }
+  .card-A.collection .meta-row {
+    display: flex; align-items: center; gap: 16px;
+    flex-shrink: 0;
+  }
+  .card-A.collection .tool-count {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .card-A.collection .arrow { width: 36px; height: 36px; }
+
+  /* List row meta count */
+  .row-B .meta-count {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 3px 8px; border-radius: 6px;
+    background: var(--surface-2);
+    margin-right: 4px;
+  }
+
+  /* Modules B: Settings-style list */
+  .list-B {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .row-B {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .row-B:last-child { border-bottom: none; }
+  .row-B:hover { background: var(--surface-2); }
+  .row-B .ic {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: grid; place-items: center; flex-shrink: 0;
+    color: white;
+  }
+  .row-B .ic svg { width: 18px; height: 18px; }
+  .row-B .info { flex: 1; min-width: 0; }
+  .row-B .info h4 { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .row-B .info p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+  .row-B .chev { color: var(--muted); }
+
+  /* Modules C: Bento grid */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 200px;
+    gap: 16px;
+  }
+  .bento-card {
+    border-radius: 24px; padding: 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .bento-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .bento-card.feat { grid-column: span 2; grid-row: span 2; }
+  .bento-card.wide { grid-column: span 2; }
+  .bento-card h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 6px; }
+  .bento-card.feat h3 { font-size: 32px; letter-spacing: -0.025em; }
+  .bento-card p { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .bento-card.feat p { font-size: 16px; max-width: 360px; }
+  .bento-card .ic-sm {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center; color: white;
+    margin-bottom: auto;
+  }
+  .bento-card .ic-sm svg { width: 18px; height: 18px; }
+  .bento-card .ic-lg {
+    width: 56px; height: 56px; border-radius: 16px;
+    display: grid; place-items: center; color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .bento-card .ic-lg svg { width: 26px; height: 26px; }
+  .bento-card .bento-visual {
+    position: absolute; right: -20px; bottom: -20px;
+    width: 220px; height: 220px;
+    opacity: .12;
+  }
+
+  /* ============ EFA TOOLS VARIATIONS ============ */
+  .efa-wrap { padding: 56px 32px; }
+  .efa-head {
+    margin-bottom: 36px;
+  }
+  .efa-head h2 { font-size: 40px; font-weight: 600; letter-spacing: -0.025em; margin: 0 0 8px; }
+  .efa-head p { color: var(--muted); font-size: 17px; margin: 0; }
+  .efa-head .breadcrumb {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--muted); margin-bottom: 16px;
+  }
+  .efa-head .breadcrumb a { color: var(--accent); transition: color .15s; display: inline-flex; align-items: center; gap: 4px; }
+  .efa-head .breadcrumb a:hover { color: var(--accent-hover); }
+  .efa-head .breadcrumb .sep { opacity: .5; }
+
+  /* EFA A: Segmented control */
+  .seg {
+    display: inline-flex; padding: 4px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .seg button {
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: var(--text);
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .seg button.active {
+    background: var(--surface); box-shadow: var(--shadow-sm);
+  }
+  .seg button:not(.active):hover { color: var(--muted); }
+  .efa-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  .tool-card {
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: transform .2s ease, box-shadow .2s ease;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .tool-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .tool-card .tag {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 10px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .tool-card h4 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .tool-card p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .tool-card .arrow-sm {
+    margin-top: auto; align-self: flex-end;
+    color: var(--muted); transition: transform .2s, color .2s;
+  }
+  .tool-card:hover .arrow-sm { color: var(--accent); transform: translate(2px, -2px); }
+
+  /* EFA B: Accordion */
+  .accordion { display: flex; flex-direction: column; gap: 8px; }
+  .acc-item {
+    border-radius: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .acc-head {
+    width: 100%;
+    padding: 18px 22px;
+    display: flex; align-items: center; gap: 14px;
+    text-align: left;
+    transition: background .15s;
+  }
+  .acc-head:hover { background: var(--surface-2); }
+  .acc-head .cat-badge {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 6px;
+    color: white;
+  }
+  .acc-head .cat-name { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .acc-head .cat-desc { color: var(--muted); font-size: 13px; }
+  .acc-head .cat-count { margin-left: auto; color: var(--muted); font-size: 12px; font-family: ui-monospace, "SF Mono", monospace; }
+  .acc-head .chev-acc { color: var(--muted); transition: transform .2s; }
+  .acc-item.open .chev-acc { transform: rotate(90deg); }
+  .acc-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height .3s ease;
+  }
+  .acc-item.open .acc-body { max-height: 800px; }
+  .acc-body-inner {
+    padding: 4px 20px 20px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  }
+  .acc-tool {
+    padding: 14px 16px; border-radius: 12px;
+    background: var(--surface-2);
+    display: flex; align-items: center; gap: 12px;
+    transition: background .15s;
+  }
+  .acc-tool:hover { background: color-mix(in srgb, var(--accent) 8%, var(--surface-2)); }
+  .acc-tool .acc-tool-name { font-size: 14px; font-weight: 500; }
+  .acc-tool .acc-tool-desc { font-size: 12px; color: var(--muted); }
+  .acc-tool .chev { margin-left: auto; color: var(--muted); }
+
+  /* EFA C: Sidebar + grid */
+  .efa-c { display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+  .efa-c-side {
+    display: flex; flex-direction: column; gap: 2px;
+    position: sticky; top: 100px; align-self: start;
+  }
+  .efa-c-side .side-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 14px; color: var(--text); font-weight: 500;
+    transition: background .15s;
+  }
+  .efa-c-side .side-link:hover { background: var(--surface-2); }
+  .efa-c-side .side-link.active { background: var(--surface-2); color: var(--text); }
+  .efa-c-side .side-link .side-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .efa-c-side .side-link .side-count { margin-left: auto; font-family: ui-monospace, "SF Mono", monospace; font-size: 11px; color: var(--muted); }
+  .efa-c-main h3 {
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin: 0 0 14px;
+  }
+  .efa-c-main h3:not(:first-of-type) { margin-top: 32px; }
+  .efa-c-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+
+  /* ============ FOOTER VARIATIONS ============ */
+  .ftr-base { border-top: 1px solid var(--border); background: var(--surface-2); }
+
+  /* Footer A: minimal */
+  .ftr-A {
+    padding: 24px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; color: var(--muted);
+  }
+  .ftr-A .left { display: flex; align-items: center; gap: 12px; }
+  .ftr-A .left .dot { width: 6px; height: 6px; border-radius: 50%; background: #34c759; }
+  .ftr-A .right { display: flex; align-items: center; gap: 24px; }
+  .ftr-A .right a { transition: color .15s; }
+  .ftr-A .right a:hover { color: var(--text); }
+
+  /* Footer B: multi-column */
+  .ftr-B { padding: 48px 32px 28px; }
+  .ftr-B-cols {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 32px; border-bottom: 1px solid var(--border);
+  }
+  .ftr-B-col h5 {
+    font-size: 12px; font-weight: 600;
+    color: var(--text); margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .ftr-B-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .ftr-B-col a { font-size: 12px; color: var(--muted); transition: color .15s; }
+  .ftr-B-col a:hover { color: var(--text); }
+  .ftr-B-col .brand .tagline { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.5; max-width: 220px; }
+  .ftr-B-bottom {
+    padding-top: 18px;
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--muted);
+  }
+  .ftr-B-bottom .links { display: flex; gap: 20px; }
+
+  /* Small responsive */
+  @media (max-width: 980px) {
+    .grid-A { grid-template-columns: repeat(2, 1fr); }
+    .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+    .bento-card.feat { grid-column: span 2; grid-row: span 2; }
+    .bento-card.wide { grid-column: span 2; }
+    .efa-grid { grid-template-columns: repeat(2, 1fr); }
+    .efa-c { grid-template-columns: 1fr; }
+    .efa-c-side { flex-direction: row; flex-wrap: wrap; position: static; }
+    .efa-c-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-B { grid-template-columns: 1fr; padding: 64px 32px; }
+    .ftr-B-cols { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ===== Floating controls ===== -->
+<div class="floating-controls">
+  <button id="theme-toggle" class="ctrl-btn" aria-label="Toggle theme" title="Toggle theme">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+    <svg class="sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+</div>
+
+<nav class="jump-nav">
+  <a href="#header"><span class="num">01</span> Header</a>
+  <a href="#hero"><span class="num">02</span> Hero</a>
+  <a href="#modules"><span class="num">03</span> Modules</a>
+  <a href="#efa"><span class="num">04</span> EFA Tools</a>
+  <a href="#footer"><span class="num">05</span> Footer</a>
+</nav>
+
+<main class="gallery-shell">
+
+  <!-- ============ INTRO ============ -->
+  <div class="gallery-intro">
+    <div class="eyebrow">iTest · Design Variations</div>
+    <h1>Pick your combination.</h1>
+    <p>Five sections, fourteen variations. Reply with the picks you want — e.g. <em>Header B + Hero A + Modules C + EFA A + Footer A</em> — and I'll assemble the final portal.</p>
+    <p style="font-size:15px;margin-top:14px;">
+      <strong style="color:var(--text);font-weight:500;">Structure:</strong> <span style="color:var(--text);">Homepage</span> = Header + Hero + Core Modules + Footer.
+      <span style="color:var(--text);">EFA Tools</span> is a dedicated sub-page (the homepage just shows it as one entry card among the modules).
+    </p>
+  </div>
+
+  <!-- ============ 01 · HEADER ============ -->
+  <section class="module-group" id="header">
+    <div class="module-label">
+      <span class="badge">01</span>
+      <h2>Header / Top Navigation</h2>
+      <span class="count">3 variations</span>
+    </div>
+
+    <!-- Header A -->
+    <div class="variation" id="header-A">
+      <div class="variation-head">
+        <span class="variation-tag">A</span>
+        <span class="variation-name">Minimal Centered</span>
+        <span class="variation-desc">apple.com style · thin centered nav</span>
+      </div>
+      <div class="variation-preview">
+        <div class="hdr-base hdr-A">
+          <div class="links">
+            <a href="#" class="logo">iTest</a>
+            <a href="#">Modules</a>
+            <a href="#">Tools</a>
+            <a href="#">Docs</a>
+            <a href="#">Support</a>
+          </div>
+          <div class="right">
+            <button class="icon-btn" aria-label="Search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+            <button class="icon-btn" aria-label="Account">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            </button>
+          </div>
+        </div>
+        <div style="padding:80px;color:var(--muted);text-align:center;font-size:13px;">— page content area —</div>
+      </div>
+    </div>
+
+    <!-- Header B -->
+    <div class="variation" id="header-B">
+      <div class="variation-head">
+        <span class="variation-tag">B</span>
+        <span class="variation-name">Floating Pill</span>
+        <span class="variation-desc">rounded floating bar · vibrancy</span>
+      </div>
+      <div class="variation-preview">
+        <div class="hdr-B-wrap">
+          <div class="hdr-B">
+            <span class="mini-logo" style="padding:0 8px 0 6px;">
+              <span class="glyph">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+              </span>
+            </span>
+            <span class="sep"></span>
+            <a class="pill-item active" href="#">Modules</a>
+            <a class="pill-item" href="#">Tools</a>
+            <a class="pill-item" href="#">Docs</a>
+            <a class="pill-item" href="#">Activity</a>
+            <span class="sep"></span>
+            <button class="icon-pill" aria-label="Search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+            <button class="icon-pill" aria-label="Account">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            </button>
+          </div>
+        </div>
+        <div style="padding:80px;color:var(--muted);text-align:center;font-size:13px;background:var(--bg);">— page content area —</div>
+      </div>
+    </div>
+
+    <!-- Header C -->
+    <div class="variation" id="header-C">
+      <div class="variation-head">
+        <span class="variation-tag">C</span>
+        <span class="variation-name">Command Palette</span>
+        <span class="variation-desc">prominent search · status indicator</span>
+      </div>
+      <div class="variation-preview">
+        <div class="hdr-base hdr-C">
+          <span class="mini-logo">
+            <span class="glyph">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+            </span>
+            iTest
+          </span>
+          <button class="cmd">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Search modules, tools, plans…</span>
+            <kbd>⌘ K</kbd>
+          </button>
+          <div class="right">
+            <div class="status"><span class="dot"></span><span>All systems online</span></div>
+            <div class="avatar">K</div>
+          </div>
+        </div>
+        <div style="padding:80px;color:var(--muted);text-align:center;font-size:13px;background:var(--bg);">— page content area —</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 · HERO ============ -->
+  <section class="module-group" id="hero">
+    <div class="module-label">
+      <span class="badge">02</span>
+      <h2>Hero</h2>
+      <span class="count">3 variations</span>
+    </div>
+
+    <!-- Hero A -->
+    <div class="variation" id="hero-A">
+      <div class="variation-head">
+        <span class="variation-tag">A</span>
+        <span class="variation-name">Massive Centered</span>
+        <span class="variation-desc">apple.com keynote style · oversized headline</span>
+      </div>
+      <div class="variation-preview">
+        <section class="hero">
+          <div class="eyebrow">Intelligent Test R&amp;D Platform</div>
+          <h1>One platform. <span class="grad">Every test workflow.</span></h1>
+          <p class="sub">From condition tables to failure analysis — iTest brings every PTE tool into one place, online, standardized, and instrumented.</p>
+          <div class="actions">
+            <a href="#" class="btn-primary">Get started <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+            <a href="#" class="btn-ghost">Watch overview <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Hero B -->
+    <div class="variation" id="hero-B">
+      <div class="variation-head">
+        <span class="variation-tag">B</span>
+        <span class="variation-name">Asymmetric + Product Preview</span>
+        <span class="variation-desc">apple product page style · mock window</span>
+      </div>
+      <div class="variation-preview">
+        <section class="hero hero-B">
+          <div>
+            <div class="eyebrow">v1.0 · itest.cxmt.com</div>
+            <h1>Every PTE tool, instrumented and online.</h1>
+            <p class="sub">Condition tables, fuse control, failure analysis, time-reduction — eighteen tools across seven modules, integrated into a single workspace.</p>
+            <div class="actions">
+              <a href="#" class="btn-primary">Open Workspace <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+              <a href="#" class="btn-secondary">View Docs</a>
+            </div>
+          </div>
+          <div class="window">
+            <div class="titlebar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="title">bitview · DDR · normal mode</span>
+            </div>
+            <div class="body">
+              <div class="row"><span class="label">VBL/VBLB</span><span class="bar w70"></span></div>
+              <div class="row"><span class="label">VPP</span><span class="bar w42"></span></div>
+              <div class="row"><span class="label">VPERI</span><span class="bar w88"></span></div>
+              <div class="row"><span class="label">VARY</span><span class="bar w55"></span></div>
+              <div class="grid-mini">
+                <span></span><span></span><span class="on"></span><span></span><span></span><span></span><span class="warn"></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span class="warn"></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span class="on"></span><span></span>
+                <span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span class="warn"></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Hero C -->
+    <div class="variation" id="hero-C">
+      <div class="variation-head">
+        <span class="variation-tag">C</span>
+        <span class="variation-name">Statement + Capability Pills</span>
+        <span class="variation-desc">scannable feature chips · single CTA</span>
+      </div>
+      <div class="variation-preview">
+        <section class="hero hero-C">
+          <div class="eyebrow">Intelligent Test R&amp;D Platform</div>
+          <h1>Built for the way <span class="grad">PTE actually ships.</span></h1>
+          <p class="sub">A unified entry point for every test workflow across CXMT — online, standardized, ready to compose.</p>
+          <div class="pills">
+            <span class="pill"><span class="dot"></span>Online editing</span>
+            <span class="pill"><span class="dot"></span>Test plan generation</span>
+            <span class="pill"><span class="dot"></span>Fuse single-source-of-truth</span>
+            <span class="pill"><span class="dot"></span>FSA &amp; PFA analysis</span>
+            <span class="pill"><span class="dot"></span>DC correlation</span>
+            <span class="pill"><span class="dot"></span>Nano probe pipeline</span>
+            <span class="pill"><span class="dot"></span>Test time reduction</span>
+          </div>
+          <a href="#" class="btn-primary">Explore modules <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · CORE MODULES ============ -->
+  <section class="module-group" id="modules">
+    <div class="module-label">
+      <span class="badge">03</span>
+      <h2>Core Modules</h2>
+      <span class="count">3 variations</span>
+    </div>
+
+    <!-- Modules A -->
+    <div class="variation" id="modules-A">
+      <div class="variation-head">
+        <span class="variation-tag">A</span>
+        <span class="variation-name">App Store Featured Cards</span>
+        <span class="variation-desc">gradient icon tiles · 3-col equal grid</span>
+      </div>
+      <div class="variation-preview">
+        <div class="modules-wrap">
+          <div class="modules-head">
+            <div>
+              <h2>Core Modules</h2>
+              <p class="desc">Seven first-class modules that power the platform.</p>
+            </div>
+            <div class="meta">7 modules</div>
+          </div>
+          <div class="grid-A">
+            <a class="card-A" href="#">
+              <div class="icon-tile grad-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+              </div>
+              <div>
+                <h3>Condition Table</h3>
+                <p>Condition Table Online Editor</p>
+                <div class="open">
+                  <span class="open-label">Open</span>
+                  <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+                </div>
+              </div>
+            </a>
+            <a class="card-A" href="#">
+              <div class="icon-tile grad-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg>
+              </div>
+              <div>
+                <h3>Fuse-Control Table</h3>
+                <p>Single source of Fuse information for all products</p>
+                <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+              </div>
+            </a>
+            <a class="card-A" href="#">
+              <div class="icon-tile grad-3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg>
+              </div>
+              <div>
+                <h3>Test Methods</h3>
+                <p>All patterns you can find here</p>
+                <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+              </div>
+            </a>
+            <a class="card-A" href="#">
+              <div class="icon-tile grad-4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>
+              </div>
+              <div>
+                <h3>Test Management</h3>
+                <p>Test plans generator</p>
+                <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+              </div>
+            </a>
+            <a class="card-A" href="#">
+              <div class="icon-tile grad-5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg>
+              </div>
+              <div>
+                <h3>TTR</h3>
+                <p>Test Time Reduction</p>
+                <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+              </div>
+            </a>
+            <a class="card-A" href="#">
+              <div class="icon-tile grad-6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>
+              </div>
+              <div>
+                <h3>DFT</h3>
+                <p>Design for Test</p>
+                <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+              </div>
+            </a>
+            <a class="card-A collection" href="#" title="Opens EFA Tools sub-page">
+              <div class="icon-tile grad-7">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              </div>
+              <div class="text-block">
+                <h3>EFA Tools</h3>
+                <p>Electrical Failure Analysis toolbox — twelve tools across six categories.</p>
+              </div>
+              <div class="meta-row">
+                <span class="tool-count">12 tools · 6 categories</span>
+                <span class="arrow"><svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modules B -->
+    <div class="variation" id="modules-B">
+      <div class="variation-head">
+        <span class="variation-tag">B</span>
+        <span class="variation-name">Settings-Style List</span>
+        <span class="variation-desc">grouped rounded container · list rows with chevrons</span>
+      </div>
+      <div class="variation-preview">
+        <div class="modules-wrap">
+          <div class="modules-head">
+            <div>
+              <h2>Core Modules</h2>
+              <p class="desc">Tap a module to enter.</p>
+            </div>
+            <div class="meta">7 modules</div>
+          </div>
+          <div class="list-B">
+            <a class="row-B" href="#">
+              <div class="ic grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+              <div class="info"><h4>Condition Table</h4><p>Condition Table Online Editor</p></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <a class="row-B" href="#">
+              <div class="ic grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></div>
+              <div class="info"><h4>Fuse-Control Table</h4><p>Single source of Fuse information for all products</p></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <a class="row-B" href="#">
+              <div class="ic grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></div>
+              <div class="info"><h4>Test Methods</h4><p>All patterns you can find here</p></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <a class="row-B" href="#">
+              <div class="ic grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+              <div class="info"><h4>Test Management</h4><p>Test plans generator</p></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <a class="row-B" href="#">
+              <div class="ic grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></div>
+              <div class="info"><h4>TTR</h4><p>Test Time Reduction</p></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <a class="row-B" href="#">
+              <div class="ic grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></div>
+              <div class="info"><h4>DFT</h4><p>Design for Test</p></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <a class="row-B" href="#">
+              <div class="ic grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+              <div class="info"><h4>EFA Tools</h4><p>Electrical Failure Analysis toolbox</p></div>
+              <span class="meta-count">12 tools</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modules C -->
+    <div class="variation" id="modules-C">
+      <div class="variation-head">
+        <span class="variation-tag">C</span>
+        <span class="variation-name">Bento Grid</span>
+        <span class="variation-desc">mixed sizes · featured tile + supporting tiles</span>
+      </div>
+      <div class="variation-preview">
+        <div class="modules-wrap">
+          <div class="modules-head">
+            <div>
+              <h2>Modules at a glance</h2>
+              <p class="desc">Featured workflows and supporting tools.</p>
+            </div>
+            <div class="meta">7 modules</div>
+          </div>
+          <div class="bento">
+            <div class="bento-card feat" style="background:linear-gradient(140deg, #0a0a0c 0%, #1d1d1f 100%); color:#f5f5f7; border-color:transparent;">
+              <div class="ic-lg grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+              <div>
+                <h3>Test Management</h3>
+                <p style="color:#a1a1a6;">Generate test plans, orchestrate runs, and ship faster across products.</p>
+                <div style="margin-top:16px;"><a href="#" class="btn-ghost" style="color:#2997ff;">Open Test Management →</a></div>
+              </div>
+            </div>
+            <div class="bento-card">
+              <div class="ic-sm grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+              <div>
+                <h3>Condition Table</h3>
+                <p>Online editor</p>
+              </div>
+            </div>
+            <div class="bento-card">
+              <div class="ic-sm grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></div>
+              <div>
+                <h3>Fuse-Control Table</h3>
+                <p>Single source of Fuse info</p>
+              </div>
+            </div>
+            <div class="bento-card wide">
+              <div class="ic-sm grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></div>
+              <div>
+                <h3>Test Methods</h3>
+                <p>Every pattern you'll need — curated and version controlled.</p>
+              </div>
+            </div>
+            <div class="bento-card">
+              <div class="ic-sm grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></div>
+              <div>
+                <h3>TTR</h3>
+                <p>Test Time Reduction</p>
+              </div>
+            </div>
+            <div class="bento-card">
+              <div class="ic-sm grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></div>
+              <div>
+                <h3>DFT</h3>
+                <p>Design for Test</p>
+              </div>
+            </div>
+            <a class="bento-card wide" href="#" style="background: linear-gradient(140deg, var(--surface-2) 0%, var(--surface) 100%);">
+              <div class="ic-sm grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+              <div>
+                <h3>EFA Tools <span style="font-size:13px;color:var(--muted);font-weight:500;margin-left:8px;">→ sub-page</span></h3>
+                <p>Electrical Failure Analysis toolbox — 12 tools across SA, LP, DDR, PVA, AV, Anti Fuse.</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · EFA TOOLS (Secondary Page) ============ -->
+  <section class="module-group" id="efa">
+    <div class="module-label">
+      <span class="badge">04</span>
+      <h2>EFA Tools — Sub-page Layout</h2>
+      <span class="count">3 variations</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin:-20px 0 28px;max-width:640px;">
+      EFA Tools is a dedicated secondary page (e.g. <code style="font-family:ui-monospace,'SF Mono',monospace;font-size:12px;padding:2px 6px;background:var(--surface-2);border-radius:4px;">itest.cxmt.com/efa-tools</code>) — these are layout options for that page. The homepage only shows it as an entry card (see Modules variations).
+    </p>
+
+    <!-- EFA A -->
+    <div class="variation" id="efa-A">
+      <div class="variation-head">
+        <span class="variation-tag">A</span>
+        <span class="variation-name">Segmented Control</span>
+        <span class="variation-desc">apple segmented control · category swap</span>
+      </div>
+      <div class="variation-preview">
+        <div class="efa-wrap">
+          <div class="efa-head">
+            <div class="breadcrumb">
+              <a href="#"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Home</a>
+              <span class="sep">/</span>
+              <span>EFA Tools</span>
+            </div>
+            <h2>EFA Toolbox</h2>
+            <p>Six categories, twelve tools for electrical failure analysis.</p>
+          </div>
+          <div class="seg" id="seg-A">
+            <button class="active" data-seg="SA">SA</button>
+            <button data-seg="LP">EFA LP</button>
+            <button data-seg="DDR">EFA DDR</button>
+            <button data-seg="PVA">PVA</button>
+            <button data-seg="AV">AV</button>
+            <button data-seg="AF">Anti Fuse</button>
+          </div>
+          <div class="efa-grid" data-seg-content="SA">
+            <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Bit line sense amplifier analysis assistant.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            <a class="tool-card" href="#"><span class="tag">Margin</span><h4>Sense Margin</h4><p>Sense margin report.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+          </div>
+          <div class="efa-grid" data-seg-content="LP" style="display:none;">
+            <a class="tool-card" href="#"><span class="tag">Fuse</span><h4>Load Fuse table</h4><p>View dynamic trim code info.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+          </div>
+          <div class="efa-grid" data-seg-content="DDR" style="display:none;">
+            <a class="tool-card" href="#"><span class="tag">Viewer</span><h4>Bitview</h4><p>Normal/compress mode fail address & FSA check and analysis.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            <a class="tool-card" href="#"><span class="tag">Map</span><h4>PFA Tool</h4><p>Map electric address to physical address for PFA analysis.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            <a class="tool-card" href="#"><span class="tag">Studio</span><h4>Mapstudio</h4><p>Listing analysis data of CP stage.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            <a class="tool-card" href="#"><span class="tag">Nano</span><h4>Nano Probe Data Analysis</h4><p>Plots, parameters, and reports from nano probe data.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+          </div>
+          <div class="efa-grid" data-seg-content="PVA" style="display:none;">
+            <a class="tool-card" href="#"><span class="tag">DC</span><h4>DC Data Analysis</h4><p>Analyze DC data and device correlation.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            <a class="tool-card" href="#"><span class="tag">Auto</span><h4>One Click</h4><p>Analyze DC data and stage correlation.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+          </div>
+          <div class="efa-grid" data-seg-content="AV" style="display:none;">
+            <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Parse normal-mode FSA for fail bit addresses.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            <a class="tool-card" href="#"><span class="tag">Leak</span><h4>Bit-level Leakage Extraction</h4><p>Per-bit leakage current at specified voltage from CP stage.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+          </div>
+          <div class="efa-grid" data-seg-content="AF" style="display:none;">
+            <a class="tool-card" href="#"><span class="tag">Array</span><h4>Fuse Array FSA</h4><p>Check the distribution of the fuse bit map.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EFA B -->
+    <div class="variation" id="efa-B">
+      <div class="variation-head">
+        <span class="variation-tag">B</span>
+        <span class="variation-name">Disclosure Accordion</span>
+        <span class="variation-desc">expandable categories · system preferences feel</span>
+      </div>
+      <div class="variation-preview">
+        <div class="efa-wrap">
+          <div class="efa-head">
+            <div class="breadcrumb">
+              <a href="#"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Home</a>
+              <span class="sep">/</span>
+              <span>EFA Tools</span>
+            </div>
+            <h2>EFA Toolbox</h2>
+            <p>Expand a category to see its tools.</p>
+          </div>
+          <div class="accordion" id="accordion-B">
+            <div class="acc-item open">
+              <button class="acc-head">
+                <span class="cat-badge" style="background:#00b4d8;">SA</span>
+                <span class="cat-name">Sense Amplifier</span>
+                <span class="cat-desc">·  bit-line analysis</span>
+                <span class="cat-count">2 tools</span>
+                <svg class="chev-acc" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="acc-body"><div class="acc-body-inner">
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">FSA Analysis</div><div class="acc-tool-desc">Bit line sense amplifier analysis assistant</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Sense Margin</div><div class="acc-tool-desc">Sense margin report</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+              </div></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head">
+                <span class="cat-badge" style="background:#ff9500;">LP</span>
+                <span class="cat-name">EFA LP</span>
+                <span class="cat-desc">·  low power</span>
+                <span class="cat-count">1 tool</span>
+                <svg class="chev-acc" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="acc-body"><div class="acc-body-inner">
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Load Fuse table</div><div class="acc-tool-desc">View dynamic trim code info</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+              </div></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head">
+                <span class="cat-badge" style="background:#af52de;">DDR</span>
+                <span class="cat-name">EFA DDR</span>
+                <span class="cat-desc">·  ddr memory analysis</span>
+                <span class="cat-count">4 tools</span>
+                <svg class="chev-acc" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="acc-body"><div class="acc-body-inner">
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Bitview</div><div class="acc-tool-desc">Normal/compress fail address &amp; FSA</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">PFA Tool</div><div class="acc-tool-desc">Map electric to physical address</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Mapstudio</div><div class="acc-tool-desc">CP stage analysis data</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Nano Probe Data Analysis</div><div class="acc-tool-desc">Plots, parameters, reports</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+              </div></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head">
+                <span class="cat-badge" style="background:#34c759;">PVA</span>
+                <span class="cat-name">PVA</span>
+                <span class="cat-desc">·  parametric / voltage</span>
+                <span class="cat-count">2 tools</span>
+                <svg class="chev-acc" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="acc-body"><div class="acc-body-inner">
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">DC Data Analysis</div><div class="acc-tool-desc">DC data and device correlation</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">One Click</div><div class="acc-tool-desc">DC data and stage correlation</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+              </div></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head">
+                <span class="cat-badge" style="background:#ff3b30;">AV</span>
+                <span class="cat-name">AV</span>
+                <span class="cat-desc">·  address / voltage</span>
+                <span class="cat-count">2 tools</span>
+                <svg class="chev-acc" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="acc-body"><div class="acc-body-inner">
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">FSA Analysis</div><div class="acc-tool-desc">Normal-mode FSA fail bit addresses</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Bit-level Leakage Extraction</div><div class="acc-tool-desc">Per-bit leakage at specified voltage</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+              </div></div>
+            </div>
+            <div class="acc-item">
+              <button class="acc-head">
+                <span class="cat-badge" style="background:#5856d6;">AF</span>
+                <span class="cat-name">Anti Fuse</span>
+                <span class="cat-desc">·  fuse array</span>
+                <span class="cat-count">1 tool</span>
+                <svg class="chev-acc" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="acc-body"><div class="acc-body-inner">
+                <a class="acc-tool" href="#"><div><div class="acc-tool-name">Fuse Array FSA</div><div class="acc-tool-desc">Fuse bit map distribution</div></div><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EFA C -->
+    <div class="variation" id="efa-C">
+      <div class="variation-head">
+        <span class="variation-tag">C</span>
+        <span class="variation-name">Sidebar + Tool Grid</span>
+        <span class="variation-desc">system-preferences style · category sidebar</span>
+      </div>
+      <div class="variation-preview">
+        <div class="efa-wrap">
+          <div class="efa-head">
+            <div class="breadcrumb">
+              <a href="#"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Home</a>
+              <span class="sep">/</span>
+              <span>EFA Tools</span>
+            </div>
+            <h2>EFA Toolbox</h2>
+            <p>All twelve tools at once, grouped by category.</p>
+          </div>
+          <div class="efa-c">
+            <aside class="efa-c-side">
+              <a class="side-link active" href="#"><span class="side-dot" style="background:#00b4d8;"></span>SA<span class="side-count">2</span></a>
+              <a class="side-link" href="#"><span class="side-dot" style="background:#ff9500;"></span>EFA LP<span class="side-count">1</span></a>
+              <a class="side-link" href="#"><span class="side-dot" style="background:#af52de;"></span>EFA DDR<span class="side-count">4</span></a>
+              <a class="side-link" href="#"><span class="side-dot" style="background:#34c759;"></span>PVA<span class="side-count">2</span></a>
+              <a class="side-link" href="#"><span class="side-dot" style="background:#ff3b30;"></span>AV<span class="side-count">2</span></a>
+              <a class="side-link" href="#"><span class="side-dot" style="background:#5856d6;"></span>Anti Fuse<span class="side-count">1</span></a>
+            </aside>
+            <div class="efa-c-main">
+              <h3>SA — Sense Amplifier</h3>
+              <div class="efa-c-grid">
+                <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Bit line sense amplifier analysis assistant.</p></a>
+                <a class="tool-card" href="#"><span class="tag">Margin</span><h4>Sense Margin</h4><p>Sense margin report.</p></a>
+              </div>
+              <h3>EFA LP — Low Power</h3>
+              <div class="efa-c-grid">
+                <a class="tool-card" href="#"><span class="tag">Fuse</span><h4>Load Fuse table</h4><p>View dynamic trim code info.</p></a>
+              </div>
+              <h3>EFA DDR — DDR Memory</h3>
+              <div class="efa-c-grid">
+                <a class="tool-card" href="#"><span class="tag">Viewer</span><h4>Bitview</h4><p>Normal/compress fail address &amp; FSA.</p></a>
+                <a class="tool-card" href="#"><span class="tag">Map</span><h4>PFA Tool</h4><p>Electric → physical address mapping.</p></a>
+                <a class="tool-card" href="#"><span class="tag">Studio</span><h4>Mapstudio</h4><p>CP stage analysis data.</p></a>
+                <a class="tool-card" href="#"><span class="tag">Nano</span><h4>Nano Probe Data Analysis</h4><p>Plots, parameters, reports.</p></a>
+              </div>
+              <h3>PVA — Parametric / Voltage Analysis</h3>
+              <div class="efa-c-grid">
+                <a class="tool-card" href="#"><span class="tag">DC</span><h4>DC Data Analysis</h4><p>DC data and device correlation.</p></a>
+                <a class="tool-card" href="#"><span class="tag">Auto</span><h4>One Click</h4><p>DC data and stage correlation.</p></a>
+              </div>
+              <h3>AV — Address / Voltage</h3>
+              <div class="efa-c-grid">
+                <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Normal-mode FSA fail bit addresses.</p></a>
+                <a class="tool-card" href="#"><span class="tag">Leak</span><h4>Bit-level Leakage Extraction</h4><p>Per-bit leakage current.</p></a>
+              </div>
+              <h3>Anti Fuse — Fuse Array</h3>
+              <div class="efa-c-grid">
+                <a class="tool-card" href="#"><span class="tag">Array</span><h4>Fuse Array FSA</h4><p>Fuse bit map distribution.</p></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · FOOTER ============ -->
+  <section class="module-group" id="footer">
+    <div class="module-label">
+      <span class="badge">05</span>
+      <h2>Footer</h2>
+      <span class="count">2 variations</span>
+    </div>
+
+    <!-- Footer A -->
+    <div class="variation" id="footer-A">
+      <div class="variation-head">
+        <span class="variation-tag">A</span>
+        <span class="variation-name">Minimal Single Line</span>
+        <span class="variation-desc">apple.com bottom · status + version + utility links</span>
+      </div>
+      <div class="variation-preview">
+        <div style="padding:48px;color:var(--muted);text-align:center;font-size:13px;background:var(--bg);">— page content ends here —</div>
+        <footer class="ftr-base ftr-A">
+          <div class="left">
+            <span class="dot"></span>
+            <span>itest.cxmt.com</span>
+            <span>·</span>
+            <span>v1.0 · build 2026.05.24</span>
+          </div>
+          <div class="right">
+            <a href="#">Docs</a>
+            <a href="#">Changelog</a>
+            <a href="#">Status</a>
+            <a href="#">Workspace</a>
+            <span>© CXMT</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Footer B -->
+    <div class="variation" id="footer-B">
+      <div class="variation-head">
+        <span class="variation-tag">B</span>
+        <span class="variation-name">Multi-Column Sitemap</span>
+        <span class="variation-desc">apple.com bottom · grouped link columns</span>
+      </div>
+      <div class="variation-preview">
+        <div style="padding:48px;color:var(--muted);text-align:center;font-size:13px;background:var(--bg);">— page content ends here —</div>
+        <footer class="ftr-base ftr-B">
+          <div class="ftr-B-cols">
+            <div class="ftr-B-col brand">
+              <span class="mini-logo">
+                <span class="glyph">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+                </span>
+                iTest
+              </span>
+              <p class="tagline">Intelligent Test R&amp;D Platform — part of the CXMT Workspace ecosystem.</p>
+            </div>
+            <div class="ftr-B-col">
+              <h5>Modules</h5>
+              <ul>
+                <li><a href="#">Condition Table</a></li>
+                <li><a href="#">Fuse-Control Table</a></li>
+                <li><a href="#">Test Methods</a></li>
+                <li><a href="#">Test Management</a></li>
+                <li><a href="#">TTR</a></li>
+                <li><a href="#">DFT</a></li>
+              </ul>
+            </div>
+            <div class="ftr-B-col">
+              <h5>EFA Tools</h5>
+              <ul>
+                <li><a href="#">SA</a></li>
+                <li><a href="#">EFA LP</a></li>
+                <li><a href="#">EFA DDR</a></li>
+                <li><a href="#">PVA</a></li>
+                <li><a href="#">AV</a></li>
+                <li><a href="#">Anti Fuse</a></li>
+              </ul>
+            </div>
+            <div class="ftr-B-col">
+              <h5>Resources</h5>
+              <ul>
+                <li><a href="#">Documentation</a></li>
+                <li><a href="#">API Reference</a></li>
+                <li><a href="#">Changelog</a></li>
+                <li><a href="#">System Status</a></li>
+                <li><a href="#">Support</a></li>
+              </ul>
+            </div>
+            <div class="ftr-B-col">
+              <h5>About</h5>
+              <ul>
+                <li><a href="#">Workspace</a></li>
+                <li><a href="#">CXMT</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">Terms</a></li>
+                <li><a href="#">Privacy</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="ftr-B-bottom">
+            <span>© 2026 CXMT · iTest v1.0 · build 2026.05.24</span>
+            <div class="links">
+              <a href="#">itest.cxmt.com</a>
+              <a href="#">Status</a>
+              <a href="#">Region: CN</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ===== Theme toggle =====
+  const toggle = document.getElementById('theme-toggle');
+  const moon = toggle.querySelector('.moon');
+  const sun = toggle.querySelector('.sun');
+  function syncIcon() {
+    const isDark = document.documentElement.classList.contains('dark');
+    moon.style.display = isDark ? '' : 'none';
+    sun.style.display = isDark ? 'none' : '';
+  }
+  syncIcon();
+  toggle.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('itest-theme', isDark ? 'dark' : 'light');
+    syncIcon();
+  });
+
+  // ===== Segmented control (EFA A) =====
+  const seg = document.getElementById('seg-A');
+  if (seg) {
+    seg.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        seg.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const key = btn.dataset.seg;
+        document.querySelectorAll('[data-seg-content]').forEach(g => {
+          g.style.display = g.dataset.segContent === key ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  // ===== Accordion (EFA B) =====
+  document.querySelectorAll('#accordion-B .acc-head').forEach(head => {
+    head.addEventListener('click', () => {
+      head.parentElement.classList.toggle('open');
+    });
+  });
+
+  // ===== Smooth scroll for jump nav =====
+  document.querySelectorAll('.jump-nav a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>

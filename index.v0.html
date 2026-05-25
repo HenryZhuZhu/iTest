@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iTest · 测试智能研发平台</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'PingFang SC', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        },
+      },
+    },
+  };
+  // Set theme before paint to avoid flash
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+
+<style>
+  :root {
+    --grid-color: rgba(15, 23, 42, 0.06);
+    --glow-1: rgba(99, 102, 241, 0.18);
+    --glow-2: rgba(34, 211, 238, 0.16);
+  }
+  html.dark {
+    --grid-color: rgba(255, 255, 255, 0.05);
+    --glow-1: rgba(99, 102, 241, 0.22);
+    --glow-2: rgba(34, 211, 238, 0.18);
+  }
+  body {
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(var(--grid-color) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 -1px;
+  }
+  .hero-glow::before {
+    content: '';
+    position: absolute;
+    inset: -40% -10% auto -10%;
+    height: 520px;
+    background:
+      radial-gradient(ellipse at 30% 40%, var(--glow-1), transparent 60%),
+      radial-gradient(ellipse at 70% 30%, var(--glow-2), transparent 55%);
+    filter: blur(40px);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .gradient-text {
+    background: linear-gradient(120deg, #22d3ee 0%, #6366f1 45%, #a855f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card-glow {
+    position: relative;
+    isolation: isolate;
+  }
+  .card-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.5), rgba(168, 85, 247, 0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity .25s ease;
+    pointer-events: none;
+  }
+  .card-glow:hover::after { opacity: 1; }
+  .arrow-shift { transition: transform .25s ease; }
+  .group:hover .arrow-shift { transform: translate(2px, -2px); }
+  .pulse-dot {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+    animation: pulse 2.4s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .fade-out { opacity: .25; filter: grayscale(0.6); pointer-events: none; }
+
+  /* divider line for EFA category */
+  .cat-divider {
+    background: linear-gradient(90deg, currentColor 0%, transparent 100%);
+    height: 1px;
+  }
+</style>
+</head>
+
+<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans transition-colors duration-300">
+
+<!-- ============ NAV ============ -->
+<header class="sticky top-0 z-40 backdrop-blur-xl bg-white/70 dark:bg-zinc-950/70 border-b border-zinc-200/70 dark:border-zinc-800/70">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
+    <!-- Logo -->
+    <a href="#" class="flex items-center gap-2.5 shrink-0">
+      <div class="relative w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-indigo-500 to-violet-500 grid place-items-center shadow-lg shadow-indigo-500/20">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/>
+        </svg>
+      </div>
+      <div class="leading-tight">
+        <div class="text-[15px] font-semibold tracking-tight">iTest</div>
+        <div class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono uppercase tracking-wider">cxmt · workspace</div>
+      </div>
+    </a>
+
+    <!-- Search -->
+    <div class="flex-1 max-w-md mx-auto hidden md:block">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input
+          id="search"
+          type="text"
+          placeholder="搜索工具或模块…"
+          class="w-full pl-10 pr-16 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-transparent focus:border-indigo-500/50 focus:bg-white dark:focus:bg-zinc-900 outline-none text-sm placeholder:text-zinc-400 transition" />
+        <kbd class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 rounded px-1.5 py-0.5">⌘ K</kbd>
+      </div>
+    </div>
+
+    <!-- Right actions -->
+    <div class="ml-auto flex items-center gap-2">
+      <a href="#" class="hidden sm:inline-flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full pulse-dot"></span>
+        <span class="font-mono">All systems online</span>
+      </a>
+      <button id="theme-toggle" aria-label="Toggle theme" class="w-9 h-9 grid place-items-center rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition">
+        <svg class="w-4 h-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="w-4 h-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+        </svg>
+      </button>
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-700 grid place-items-center text-xs font-semibold text-zinc-700 dark:text-zinc-200">
+        K
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="relative hero-glow">
+  <div class="max-w-7xl mx-auto px-6 pt-20 pb-14 relative">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+      <span>v1.0 · itest.cxmt.com</span>
+      <span class="text-zinc-300 dark:text-zinc-700">/</span>
+      <span class="text-indigo-500 dark:text-indigo-400">production ready</span>
+    </div>
+
+    <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] max-w-3xl">
+      测试智能研发平台
+      <br/>
+      <span class="gradient-text">Intelligent Test R&amp;D Platform</span>
+    </h1>
+
+    <p class="mt-6 max-w-2xl text-base md:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      将 PTE 测试工作中的各项工具集成在一个统一的平台入口上 ——
+      使工具在线化、标准化、智能化，全面提升芯片测试能力。
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center gap-3">
+      <a href="#core" class="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:opacity-90 transition">
+        浏览所有模块
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#" class="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-zinc-200 dark:border-zinc-800 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition">
+        查看文档
+      </a>
+      <div class="hidden md:flex items-center gap-6 ml-4 text-sm font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-zinc-400">modules</span><span class="text-zinc-900 dark:text-zinc-100 font-semibold">07</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-zinc-400">tools</span><span class="text-zinc-900 dark:text-zinc-100 font-semibold">18</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-zinc-400">uptime</span><span class="text-emerald-600 dark:text-emerald-400 font-semibold">99.98%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CORE MODULES ============ -->
+<section id="core" class="max-w-7xl mx-auto px-6 pb-16">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <div class="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">— 01 / core modules</div>
+      <h2 class="text-2xl font-semibold tracking-tight">核心模块</h2>
+    </div>
+    <div class="text-xs font-mono text-zinc-400 hidden md:block">6 modules</div>
+  </div>
+
+  <div id="core-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <!-- Card: Condition Table -->
+    <a href="#" data-search="condition table editor 条件表"
+       class="module-card card-glow group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-400/15 to-cyan-500/5 border border-cyan-400/20 grid place-items-center text-cyan-600 dark:text-cyan-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        </div>
+        <svg class="arrow-shift w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="text-base font-semibold mb-1">Condition Table</div>
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">Condition Table Online Editor</div>
+      <div class="mt-5 flex items-center gap-2 text-[11px] font-mono">
+        <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">EDITOR</span>
+      </div>
+    </a>
+
+    <!-- Card: Fuse-Control Table -->
+    <a href="#" data-search="fuse control table"
+       class="module-card card-glow group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400/15 to-amber-500/5 border border-amber-400/20 grid place-items-center text-amber-600 dark:text-amber-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg>
+        </div>
+        <svg class="arrow-shift w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="text-base font-semibold mb-1">Fuse-Control Table</div>
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">Single source of Fuse information for all products</div>
+      <div class="mt-5 flex items-center gap-2 text-[11px] font-mono">
+        <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">SOURCE-OF-TRUTH</span>
+      </div>
+    </a>
+
+    <!-- Card: Test Methods -->
+    <a href="#" data-search="test methods patterns"
+       class="module-card card-glow group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-400/15 to-violet-500/5 border border-violet-400/20 grid place-items-center text-violet-600 dark:text-violet-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg>
+        </div>
+        <svg class="arrow-shift w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="text-base font-semibold mb-1">Test Methods</div>
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">All Patterns you can find here</div>
+      <div class="mt-5 flex items-center gap-2 text-[11px] font-mono">
+        <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">PATTERN LIBRARY</span>
+      </div>
+    </a>
+
+    <!-- Card: Test Management -->
+    <a href="#" data-search="test management plans generator"
+       class="module-card card-glow group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400/15 to-emerald-500/5 border border-emerald-400/20 grid place-items-center text-emerald-600 dark:text-emerald-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>
+        </div>
+        <svg class="arrow-shift w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="text-base font-semibold mb-1">Test Management</div>
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">Test plans generator</div>
+      <div class="mt-5 flex items-center gap-2 text-[11px] font-mono">
+        <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">PLANNING</span>
+      </div>
+    </a>
+
+    <!-- Card: TTR -->
+    <a href="#" data-search="ttr test time reduction"
+       class="module-card card-glow group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-400/15 to-rose-500/5 border border-rose-400/20 grid place-items-center text-rose-600 dark:text-rose-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg>
+        </div>
+        <svg class="arrow-shift w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="text-base font-semibold mb-1">TTR</div>
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">Test Time Reduction</div>
+      <div class="mt-5 flex items-center gap-2 text-[11px] font-mono">
+        <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">OPTIMIZATION</span>
+      </div>
+    </a>
+
+    <!-- Card: DFT -->
+    <a href="#" data-search="dft design for test"
+       class="module-card card-glow group relative rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-400/15 to-indigo-500/5 border border-indigo-400/20 grid place-items-center text-indigo-600 dark:text-indigo-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>
+        </div>
+        <svg class="arrow-shift w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="text-base font-semibold mb-1">DFT</div>
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">Design for Test</div>
+      <div class="mt-5 flex items-center gap-2 text-[11px] font-mono">
+        <span class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">DESIGN</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ============ EFA TOOLS ============ -->
+<section class="max-w-7xl mx-auto px-6 pb-24">
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <div class="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">— 02 / efa toolbox</div>
+      <h2 class="text-2xl font-semibold tracking-tight">EFA Tools</h2>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2 max-w-xl">
+        电性失效分析工具集 — 覆盖 SA、LP、DDR、PVA、AV、Anti Fuse 六大方向。
+      </p>
+    </div>
+    <div class="text-xs font-mono text-zinc-400 hidden md:flex items-center gap-3">
+      <span>6 categories</span><span class="text-zinc-300 dark:text-zinc-700">·</span><span>12 tools</span>
+    </div>
+  </div>
+
+  <div class="space-y-10" id="efa-root">
+
+    <!-- ── SA ── -->
+    <div class="efa-category" data-cat="SA">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-xs font-medium text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">SA</span>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">Sense Amplifier</div>
+        <div class="flex-1 cat-divider text-zinc-200 dark:text-zinc-800"></div>
+        <div class="font-mono text-[11px] text-zinc-400">2 tools</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="#" data-search="fsa analysis bit line sense amplifier sa"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-cyan-400/40 dark:hover:border-cyan-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-cyan-600 dark:text-cyan-400">FSA</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">FSA Analysis</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Bit line sense amplifier analysis assistant</div>
+        </a>
+        <a href="#" data-search="sense margin report sa"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-cyan-400/40 dark:hover:border-cyan-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-cyan-600 dark:text-cyan-400">MARGIN</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Sense Margin</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Sense margin report</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── EFA LP ── -->
+    <div class="efa-category" data-cat="EFA LP">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-xs font-medium text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20">EFA&nbsp;LP</span>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">Low Power</div>
+        <div class="flex-1 cat-divider text-zinc-200 dark:text-zinc-800"></div>
+        <div class="font-mono text-[11px] text-zinc-400">1 tool</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="#" data-search="load fuse table dynamic trim code lp"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-amber-400/40 dark:hover:border-amber-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-amber-600 dark:text-amber-400">FUSE</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Load Fuse table</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">View dynamic trim code info</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── EFA DDR ── -->
+    <div class="efa-category" data-cat="EFA DDR">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-xs font-medium text-violet-600 dark:text-violet-400 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20">EFA&nbsp;DDR</span>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">DDR Memory</div>
+        <div class="flex-1 cat-divider text-zinc-200 dark:text-zinc-800"></div>
+        <div class="font-mono text-[11px] text-zinc-400">4 tools</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="#" data-search="bitview normal compress mode fail address fsa ddr"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-violet-400/40 dark:hover:border-violet-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-violet-600 dark:text-violet-400">VIEWER</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Bitview</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Normal/compress mode fail address &amp; FSA check and analysis</div>
+        </a>
+        <a href="#" data-search="pfa tool mapping electric physical address ddr"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-violet-400/40 dark:hover:border-violet-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-violet-600 dark:text-violet-400">MAP</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">PFA Tool</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Map electric address to physical address for PFA analysis</div>
+        </a>
+        <a href="#" data-search="mapstudio cp stage analysis data ddr"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-violet-400/40 dark:hover:border-violet-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-violet-600 dark:text-violet-400">STUDIO</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Mapstudio</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Listing analysis data of CP stage</div>
+        </a>
+        <a href="#" data-search="nano probe data analysis plots parameters reports ddr"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-violet-400/40 dark:hover:border-violet-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-violet-600 dark:text-violet-400">NANO</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Nano Probe Data Analysis</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Process nano probe data, generate plots, extract parameters, output reports</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── PVA ── -->
+    <div class="efa-category" data-cat="PVA">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-xs font-medium text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">PVA</span>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">Parametric / Voltage Analysis</div>
+        <div class="flex-1 cat-divider text-zinc-200 dark:text-zinc-800"></div>
+        <div class="font-mono text-[11px] text-zinc-400">2 tools</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="#" data-search="dc data analysis device correlation pva"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-emerald-400/40 dark:hover:border-emerald-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">DC</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">DC Data Analysis</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Analyze DC data and device correlation</div>
+        </a>
+        <a href="#" data-search="one click dc data analysis stage correlation pva"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-emerald-400/40 dark:hover:border-emerald-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">AUTO</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">One Click</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Analyze DC data and stage correlation</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── AV ── -->
+    <div class="efa-category" data-cat="AV">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-xs font-medium text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20">AV</span>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">Address / Voltage</div>
+        <div class="flex-1 cat-divider text-zinc-200 dark:text-zinc-800"></div>
+        <div class="font-mono text-[11px] text-zinc-400">2 tools</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="#" data-search="fsa analysis normal mode fail bit address logical av"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-rose-400/40 dark:hover:border-rose-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-rose-600 dark:text-rose-400">FSA</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">FSA Analysis</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Parse normal-mode FSA to extract fail bit address info for logical operations</div>
+        </a>
+        <a href="#" data-search="bit level leakage extraction cp stage voltage av"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-rose-400/40 dark:hover:border-rose-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-rose-600 dark:text-rose-400">LEAK</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Bit-level Leakage Extraction</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Extract per-bit leakage current at specified voltage from CP stage</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Anti Fuse ── -->
+    <div class="efa-category" data-cat="Anti Fuse">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">ANTI&nbsp;FUSE</span>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">Fuse Array</div>
+        <div class="flex-1 cat-divider text-zinc-200 dark:text-zinc-800"></div>
+        <div class="font-mono text-[11px] text-zinc-400">1 tool</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="#" data-search="fuse array fsa bit map distribution anti fuse"
+           class="module-card group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 hover:border-indigo-400/40 dark:hover:border-indigo-400/40 hover:-translate-y-0.5 transition">
+          <div class="flex items-start justify-between mb-3">
+            <div class="font-mono text-[10px] text-indigo-600 dark:text-indigo-400">ARRAY</div>
+            <svg class="arrow-shift w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          </div>
+          <div class="text-sm font-semibold mb-1">Fuse Array FSA</div>
+          <div class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Check the distribution of the fuse bit map</div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-zinc-200 dark:border-zinc-800 mt-8">
+  <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono text-zinc-500 dark:text-zinc-400">
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
+      <span>itest.cxmt.com</span>
+      <span class="text-zinc-300 dark:text-zinc-700">·</span>
+      <span>build 2026.05.24</span>
+    </div>
+    <div class="flex items-center gap-5">
+      <a href="#" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Docs</a>
+      <a href="#" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Changelog</a>
+      <a href="#" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Status</a>
+      <a href="#" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Workspace</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ---- Theme toggle ----
+  const toggle = document.getElementById('theme-toggle');
+  toggle.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('itest-theme', isDark ? 'dark' : 'light');
+  });
+
+  // ---- Search filter ----
+  const search = document.getElementById('search');
+  const cards = Array.from(document.querySelectorAll('.module-card'));
+  const efaCats = Array.from(document.querySelectorAll('.efa-category'));
+
+  function applyFilter(q) {
+    q = q.trim().toLowerCase();
+    cards.forEach(card => {
+      const hay = (card.getAttribute('data-search') || '') + ' ' + card.textContent;
+      const hit = !q || hay.toLowerCase().includes(q);
+      card.classList.toggle('fade-out', !hit);
+    });
+    // Hide whole EFA category when no visible card inside
+    efaCats.forEach(cat => {
+      const anyVisible = Array.from(cat.querySelectorAll('.module-card')).some(c => !c.classList.contains('fade-out'));
+      cat.style.display = anyVisible ? '' : 'none';
+    });
+  }
+
+  search?.addEventListener('input', e => applyFilter(e.target.value));
+
+  // ---- ⌘K to focus search ----
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      search?.focus();
+      search?.select();
+    }
+    if (e.key === 'Escape' && document.activeElement === search) {
+      search.value = '';
+      applyFilter('');
+      search.blur();
+    }
+  });
+</script>
+
+</body>
+</html>

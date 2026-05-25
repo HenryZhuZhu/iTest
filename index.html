@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iTest · Intelligent PTE Tool Platform</title>
+<link rel="stylesheet" href="styles.css" />
+<script>
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+</head>
+
+<body>
+
+<!-- ====== Header: brand · Products dropdown · nav-right ====== -->
+<header class="site-header">
+  <div class="nav-left">
+    <a href="index.html" class="brand" aria-label="iTest — back to homepage">iTest</a>
+
+    <nav class="nav-products">
+      <a href="index.html#modules" class="nav-link" aria-haspopup="true">
+        Products
+        <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+      </a>
+      <div class="dropdown" role="menu">
+        <a class="dropdown-item" href="#" role="menuitem">
+          <span class="icon-mini grad-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">Condition Table</span>
+            <span class="desc">Online editor</span>
+          </span>
+        </a>
+        <a class="dropdown-item" href="#" role="menuitem">
+          <span class="icon-mini grad-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">Fuse-Control Table</span>
+            <span class="desc">Single source of Fuse info</span>
+          </span>
+        </a>
+        <a class="dropdown-item" href="#" role="menuitem">
+          <span class="icon-mini grad-3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">Test Methods</span>
+            <span class="desc">Pattern library</span>
+          </span>
+        </a>
+        <a class="dropdown-item" href="#" role="menuitem">
+          <span class="icon-mini grad-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">Test Management</span>
+            <span class="desc">Test plans generator</span>
+          </span>
+        </a>
+        <a class="dropdown-item" href="#" role="menuitem">
+          <span class="icon-mini grad-5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">TTR</span>
+            <span class="desc">Test Time Reduction</span>
+          </span>
+        </a>
+        <a class="dropdown-item" href="#" role="menuitem">
+          <span class="icon-mini grad-6">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">DFT</span>
+            <span class="desc">Design for Test</span>
+          </span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="efa-tools.html" role="menuitem">
+          <span class="icon-mini grad-7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          </span>
+          <span class="text">
+            <span class="name">EFA Tools</span>
+            <span class="desc">12 tools · 6 categories</span>
+          </span>
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      <svg class="sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ====== Hero (Variation A — Massive Centered) ====== -->
+<section class="hero">
+  <div class="eyebrow">Intelligent PTE Tool Platform</div>
+  <h1>One Platform. <br><span class="grad">All Test Tools.</span></h1>
+  <p class="sub">From condition tables to failure analysis — iTest brings every PTE tool into one place, online, standardized, and instrumented.</p>
+  <div class="actions">
+    <a href="#modules" class="btn-primary">
+      Get started
+      <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ====== Tools grid (from variation Modules A — App Store Featured Cards) ====== -->
+<section class="page-shell modules-wrap" id="modules">
+  <div class="modules-head">
+    <div>
+      <h2>Tools</h2>
+      <p class="desc">Core tools that support the test workflows.</p>
+    </div>
+    <div class="meta">7 tools</div>
+  </div>
+
+  <div class="grid-A">
+
+    <a class="card-A" href="#">
+      <div class="icon-tile grad-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      </div>
+      <div>
+        <h3>Condition Table</h3>
+        <p>Condition Table Online Editor</p>
+        <div class="open">
+          <span class="open-label">Open</span>
+          <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-A" href="#">
+      <div class="icon-tile grad-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg>
+      </div>
+      <div>
+        <h3>Fuse-Control Table</h3>
+        <p>Single source of Fuse information for all products</p>
+        <div class="open">
+          <span class="open-label">Open</span>
+          <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-A" href="#">
+      <div class="icon-tile grad-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg>
+      </div>
+      <div>
+        <h3>Test Methods</h3>
+        <p>All patterns you can find here</p>
+        <div class="open">
+          <span class="open-label">Open</span>
+          <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-A" href="#">
+      <div class="icon-tile grad-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>
+      </div>
+      <div>
+        <h3>Test Management</h3>
+        <p>Test plans generator</p>
+        <div class="open">
+          <span class="open-label">Open</span>
+          <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-A" href="#">
+      <div class="icon-tile grad-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg>
+      </div>
+      <div>
+        <h3>TTR</h3>
+        <p>Test Time Reduction</p>
+        <div class="open">
+          <span class="open-label">Open</span>
+          <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-A" href="#">
+      <div class="icon-tile grad-6">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>
+      </div>
+      <div>
+        <h3>DFT</h3>
+        <p>Design for Test</p>
+        <div class="open">
+          <span class="open-label">Open</span>
+          <span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+        </div>
+      </div>
+    </a>
+
+    <!-- EFA Tools — full-width entry card, links to the dedicated sub-page -->
+    <a class="card-A collection" href="efa-tools.html">
+      <div class="icon-tile grad-7">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
+      <div class="text-block">
+        <h3>EFA Tools</h3>
+        <p>Electrical Failure Analysis toolbox</p>
+      </div>
+      <div class="meta-row">
+        <span class="tool-count">12 tools · 6 categories</span>
+        <span class="arrow"><svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ====== Footer (Variation B — Multi-Column Sitemap) ====== -->
+<footer class="site-footer">
+  <div class="cols">
+    <div class="col brand">
+      <span class="mini-logo">
+        <span class="glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+        </span>
+        iTest
+      </span>
+      <p class="tagline">Brings every PTE tool into one place, online, standardized, and instrumented.</p>
+    </div>
+    <div class="col">
+      <h5>Tools</h5>
+      <ul>
+        <li><a href="#">Condition Table</a></li>
+        <li><a href="#">Fuse-Control Table</a></li>
+        <li><a href="#">Test Methods</a></li>
+        <li><a href="#">Test Management</a></li>
+        <li><a href="#">TTR</a></li>
+        <li><a href="#">DFT</a></li>
+        <li><a href="#">EFA Tools</a></li>
+      </ul>
+    </div>
+    <div class="col">
+      <h5>EFA Tools</h5>
+      <ul>
+        <li><a href="efa-tools.html#SA">SA</a></li>
+        <li><a href="efa-tools.html#LP">EFA LP</a></li>
+        <li><a href="efa-tools.html#DDR">EFA DDR</a></li>
+        <li><a href="efa-tools.html#PVA">PVA</a></li>
+        <li><a href="efa-tools.html#AV">AV</a></li>
+        <li><a href="efa-tools.html#AF">Anti Fuse</a></li>
+      </ul>
+    </div>
+    <div class="col">
+      <h5>Resources</h5>
+      <ul>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">API Reference</a></li>
+        <li><a href="#">Changelog</a></li>
+        <li><a href="#">System Status</a></li>
+        <li><a href="#">Support</a></li>
+      </ul>
+    </div>
+    <div class="col">
+      <h5>About</h5>
+      <ul>
+        <li><a href="#">Workspace</a></li>
+        <li><a href="#">CXMT</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Terms</a></li>
+        <li><a href="#">Privacy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom">
+    <span>© 2026 CXMT · iTest v1.0 · build 2026.05.25</span>
+    <div class="links">
+      <a href="#">itest.cxmt.com</a>
+      <a href="#">Status</a>
+      <a href="#">Region: CN</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle
+  const btn = document.getElementById('theme-toggle');
+  const moon = btn.querySelector('.moon');
+  const sun = btn.querySelector('.sun');
+  function sync() {
+    const isDark = document.documentElement.classList.contains('dark');
+    moon.style.display = isDark ? '' : 'none';
+    sun.style.display = isDark ? 'none' : '';
+  }
+  sync();
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('itest-theme', isDark ? 'dark' : 'light');
+    sync();
+  });
+</script>
+
+</body>
+</html>

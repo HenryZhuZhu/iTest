@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iTest · Combo Picker</title>
+
+<script>
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+
+<style>
+  /* ============ TOKENS (Apple aesthetic) ============ */
+  :root {
+    --bg: #fbfbfd;
+    --surface: #ffffff;
+    --surface-2: #f5f5f7;
+    --text: #1d1d1f;
+    --muted: #86868b;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.14);
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.06);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.08);
+    --nav-bg: rgba(251, 251, 253, 0.82);
+  }
+  html.dark {
+    --bg: #000000;
+    --surface: #1d1d1f;
+    --surface-2: #161617;
+    --text: #f5f5f7;
+    --muted: #86868b;
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --accent: #2997ff;
+    --accent-hover: #47a7ff;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.3);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+    --nav-bg: rgba(0, 0, 0, 0.82);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color .3s ease, color .3s ease;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font: inherit; }
+
+  /* ============ PICKER BAR ============ */
+  .picker {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--nav-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex; align-items: center; gap: 20px;
+    flex-wrap: wrap;
+  }
+  .picker-brand {
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 10px;
+    padding-right: 16px;
+    border-right: 1px solid var(--border);
+  }
+  .picker-brand .glyph {
+    width: 22px; height: 22px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #0071e3, #5e5ce6, #af52de);
+    box-shadow: var(--shadow-sm);
+  }
+  .picker-brand .sub {
+    color: var(--muted); font-weight: 500; font-size: 12px;
+  }
+  .picker-controls {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .picker-group {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .picker-group label {
+    font-size: 10px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .picker-seg {
+    display: inline-flex; padding: 3px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .picker-seg button {
+    padding: 5px 12px; border-radius: 5px;
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    transition: background .15s, color .15s, box-shadow .15s;
+    min-width: 28px;
+  }
+  .picker-seg button.active {
+    background: var(--surface); color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+  .picker-seg button:not(.active):hover { color: var(--text); }
+  .picker-group.page .picker-seg button { padding: 5px 14px; font-weight: 600; }
+  .picker-group.dim { opacity: 0.45; transition: opacity .2s; }
+
+  .picker-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .picker-right .combo-label {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 5px 10px; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .picker-right .combo-label strong {
+    color: var(--text); font-weight: 600;
+  }
+  .theme-toggle {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: 8px;
+    color: var(--muted); transition: background .15s, color .15s;
+    border: 1px solid var(--border);
+  }
+  .theme-toggle:hover { background: var(--surface-2); color: var(--text); }
+  .theme-toggle svg { width: 14px; height: 14px; }
+
+  /* Hint footer below picker */
+  .picker-hint {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .picker-hint code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    padding: 2px 6px; border-radius: 4px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* ============ SHARED PREVIEW UI ============ */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 22px;
+    border-radius: 980px;
+    background: var(--accent); color: white;
+    font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 22px;
+    border-radius: 980px;
+    background: transparent; color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+    transition: background .15s ease;
+  }
+  .btn-secondary:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--accent);
+    font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .btn-ghost:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .chevron { width: 12px; height: 12px; }
+
+  .mini-logo {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 600; letter-spacing: -0.01em;
+  }
+  .mini-logo .glyph {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: linear-gradient(140deg, #1d1d1f 0%, #424245 100%);
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-sm);
+  }
+  html.dark .mini-logo .glyph {
+    background: linear-gradient(140deg, #f5f5f7 0%, #c7c7cc 100%);
+  }
+  .mini-logo .glyph svg { width: 14px; height: 14px; }
+  .mini-logo .glyph svg path,
+  .mini-logo .glyph svg rect { stroke: white; }
+  html.dark .mini-logo .glyph svg path,
+  html.dark .mini-logo .glyph svg rect { stroke: #1d1d1f; }
+
+  /* ============ HEADER VARIATIONS ============ */
+  .hdr-base {
+    position: relative;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+  .hdr-A {
+    height: 56px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 32px;
+  }
+  .hdr-A .links {
+    display: flex; align-items: center; gap: 28px;
+    font-size: 13px; color: var(--text);
+  }
+  .hdr-A .links a { opacity: .85; transition: opacity .15s; }
+  .hdr-A .links a:hover { opacity: 1; }
+  .hdr-A .links .logo { font-weight: 600; }
+  .hdr-A .right { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); display: flex; gap: 8px; }
+  .hdr-A .icon-btn {
+    width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
+    color: var(--muted); transition: background .15s, color .15s;
+  }
+  .hdr-A .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+  .hdr-B-wrap {
+    padding: 16px 24px; display: flex; justify-content: center;
+    background: linear-gradient(180deg, var(--surface-2), var(--bg));
+  }
+  .hdr-B {
+    display: flex; align-items: center; gap: 4px;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--nav-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+  .hdr-B .pill-item {
+    padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    color: var(--text); transition: background .15s;
+  }
+  .hdr-B .pill-item:hover { background: var(--surface-2); }
+  .hdr-B .pill-item.active { background: var(--text); color: var(--bg); }
+  .hdr-B .sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+  .hdr-B .icon-pill {
+    width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center;
+    color: var(--muted); transition: background .15s, color .15s;
+  }
+  .hdr-B .icon-pill:hover { background: var(--surface-2); color: var(--text); }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,199,89,.55); }
+    70%  { box-shadow: 0 0 0 6px rgba(52,199,89,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); }
+  }
+
+  /* ============ HERO VARIATIONS ============ */
+  .hero {
+    padding: 96px 32px;
+    text-align: center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero .eyebrow {
+    font-size: 13px; font-weight: 500; color: var(--accent);
+    letter-spacing: -0.01em; margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 600; letter-spacing: -0.035em;
+    line-height: 1.02; margin: 0 0 24px;
+    max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, #0071e3 0%, #5e5ce6 50%, #af52de 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  html.dark .hero h1 .grad {
+    background: linear-gradient(120deg, #2997ff 0%, #5e5ce6 50%, #bf5af2 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.sub {
+    font-size: clamp(18px, 1.6vw, 21px);
+    color: var(--muted); line-height: 1.4;
+    max-width: 640px; margin: 0 auto 36px;
+  }
+  .hero .actions { display: inline-flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+  .hero-C { padding: 88px 32px 80px; text-align: center; }
+  .hero-C .pills {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    max-width: 760px; margin: 32px auto 36px;
+  }
+  .hero-C .pill {
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 13px; color: var(--text); font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color .15s, background .15s;
+  }
+  .hero-C .pill:hover { border-color: var(--border-strong); }
+  .hero-C .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* ============ CORE MODULES VARIATIONS ============ */
+  .modules-wrap { padding: 56px 32px; }
+  .modules-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .modules-head h2 {
+    font-size: 40px; font-weight: 600; letter-spacing: -0.025em;
+    margin: 0;
+  }
+  .modules-head .desc { color: var(--muted); font-size: 17px; margin: 8px 0 0; }
+  .modules-head .meta { font-family: ui-monospace, "SF Mono", monospace; font-size: 12px; color: var(--muted); }
+
+  .grid-A {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .card-A {
+    border-radius: 28px;
+    padding: 28px;
+    min-height: 220px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: var(--text);
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .card-A:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .card-A .icon-tile {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-A .icon-tile svg { width: 24px; height: 24px; color: white; }
+  .card-A h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin: 16px 0 4px; }
+  .card-A p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.45; }
+  .card-A .open { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .card-A .open-label { font-size: 13px; color: var(--accent); font-weight: 500; }
+  .card-A .arrow { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; transition: transform .2s, background .2s; }
+  .card-A:hover .arrow { transform: translate(2px, -2px); background: var(--accent); color: white; }
+
+  .grad-1 { background: linear-gradient(140deg, #00b4d8, #0077b6); }
+  .grad-2 { background: linear-gradient(140deg, #ff9500, #ff6b00); }
+  .grad-3 { background: linear-gradient(140deg, #af52de, #5e5ce6); }
+  .grad-4 { background: linear-gradient(140deg, #34c759, #00a86b); }
+  .grad-5 { background: linear-gradient(140deg, #ff3b30, #ff2d55); }
+  .grad-6 { background: linear-gradient(140deg, #5856d6, #007aff); }
+  .grad-7 { background: linear-gradient(140deg, #424245, #1d1d1f); }
+  html.dark .grad-7 { background: linear-gradient(140deg, #6e6e73, #2a2a2c); }
+
+  .card-A.collection {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+    padding: 28px 32px;
+    min-height: 0;
+  }
+  .card-A.collection .icon-tile { width: 60px; height: 60px; border-radius: 18px; flex-shrink: 0; }
+  .card-A.collection .icon-tile svg { width: 28px; height: 28px; }
+  .card-A.collection .text-block { flex: 1; min-width: 0; }
+  .card-A.collection h3 { font-size: 24px; margin: 0 0 4px; }
+  .card-A.collection p { font-size: 14px; }
+  .card-A.collection .meta-row {
+    display: flex; align-items: center; gap: 16px;
+    flex-shrink: 0;
+  }
+  .card-A.collection .tool-count {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .card-A.collection .arrow { width: 36px; height: 36px; }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 200px;
+    gap: 16px;
+  }
+  .bento-card {
+    border-radius: 24px; padding: 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .bento-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .bento-card.feat { grid-column: span 2; grid-row: span 2; }
+  .bento-card.wide { grid-column: span 2; }
+  .bento-card h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 6px; }
+  .bento-card.feat h3 { font-size: 32px; letter-spacing: -0.025em; }
+  .bento-card p { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .bento-card.feat p { font-size: 16px; max-width: 360px; }
+  .bento-card .ic-sm {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center; color: white;
+    margin-bottom: auto;
+  }
+  .bento-card .ic-sm svg { width: 18px; height: 18px; }
+  .bento-card .ic-lg {
+    width: 56px; height: 56px; border-radius: 16px;
+    display: grid; place-items: center; color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .bento-card .ic-lg svg { width: 26px; height: 26px; }
+
+  /* ============ EFA TOOLS VARIATIONS ============ */
+  .efa-wrap { padding: 56px 32px; }
+  .efa-head { margin-bottom: 36px; }
+  .efa-head h2 { font-size: 40px; font-weight: 600; letter-spacing: -0.025em; margin: 0 0 8px; }
+  .efa-head p { color: var(--muted); font-size: 17px; margin: 0; }
+  .efa-head .breadcrumb {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--muted); margin-bottom: 16px;
+  }
+  .efa-head .breadcrumb a { color: var(--accent); transition: color .15s; display: inline-flex; align-items: center; gap: 4px; }
+  .efa-head .breadcrumb a:hover { color: var(--accent-hover); }
+  .efa-head .breadcrumb .sep { opacity: .5; }
+
+  .seg {
+    display: inline-flex; padding: 4px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .seg button {
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: var(--text);
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .seg button.active {
+    background: var(--surface); box-shadow: var(--shadow-sm);
+  }
+  .seg button:not(.active):hover { color: var(--muted); }
+  .efa-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  .tool-card {
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: transform .2s ease, box-shadow .2s ease;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .tool-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .tool-card .tag {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 10px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .tool-card h4 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .tool-card p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .tool-card .arrow-sm {
+    margin-top: auto; align-self: flex-end;
+    color: var(--muted); transition: transform .2s, color .2s;
+  }
+  .tool-card:hover .arrow-sm { color: var(--accent); transform: translate(2px, -2px); }
+
+  .efa-c { display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+  .efa-c-side {
+    display: flex; flex-direction: column; gap: 2px;
+    position: sticky; top: 100px; align-self: start;
+  }
+  .efa-c-side .side-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 14px; color: var(--text); font-weight: 500;
+    transition: background .15s;
+  }
+  .efa-c-side .side-link:hover { background: var(--surface-2); }
+  .efa-c-side .side-link.active { background: var(--surface-2); color: var(--text); }
+  .efa-c-side .side-link .side-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .efa-c-side .side-link .side-count { margin-left: auto; font-family: ui-monospace, "SF Mono", monospace; font-size: 11px; color: var(--muted); }
+  .efa-c-main h3 {
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin: 0 0 14px;
+  }
+  .efa-c-main h3:not(:first-of-type) { margin-top: 32px; }
+  .efa-c-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+
+  /* ============ FOOTER VARIATIONS ============ */
+  .ftr-base { border-top: 1px solid var(--border); background: var(--surface-2); }
+
+  .ftr-B { padding: 48px 32px 28px; }
+  .ftr-B-cols {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 32px; border-bottom: 1px solid var(--border);
+  }
+  .ftr-B-col h5 {
+    font-size: 12px; font-weight: 600;
+    color: var(--text); margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .ftr-B-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .ftr-B-col a { font-size: 12px; color: var(--muted); transition: color .15s; }
+  .ftr-B-col a:hover { color: var(--text); }
+  .ftr-B-col .brand .tagline { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.5; max-width: 220px; }
+  .ftr-B-bottom {
+    padding-top: 18px;
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--muted);
+  }
+  .ftr-B-bottom .links { display: flex; gap: 20px; }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .grid-A { grid-template-columns: repeat(2, 1fr); }
+    .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+    .bento-card.feat { grid-column: span 2; grid-row: span 2; }
+    .bento-card.wide { grid-column: span 2; }
+    .efa-grid { grid-template-columns: repeat(2, 1fr); }
+    .efa-c { grid-template-columns: 1fr; }
+    .efa-c-side { flex-direction: row; flex-wrap: wrap; position: static; }
+    .efa-c-grid { grid-template-columns: repeat(2, 1fr); }
+    .ftr-B-cols { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Fade transition for preview swap */
+  #preview {
+    animation: fade-in .25s ease;
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- =========== PICKER BAR =========== -->
+<header class="picker">
+  <div class="picker-brand">
+    <span class="glyph"></span>
+    iTest <span class="sub">Combo Picker</span>
+  </div>
+
+  <div class="picker-controls">
+    <div class="picker-group page" data-control="view">
+      <label>Page</label>
+      <div class="picker-seg">
+        <button class="active" data-key="view" data-val="home">Homepage</button>
+        <button data-key="view" data-val="efa">EFA Sub-page</button>
+      </div>
+    </div>
+    <div class="picker-group" data-control="header">
+      <label>Header</label>
+      <div class="picker-seg">
+        <button class="active" data-key="header" data-val="A">A</button>
+        <button data-key="header" data-val="B">B</button>
+      </div>
+    </div>
+    <div class="picker-group" data-control="hero">
+      <label>Hero</label>
+      <div class="picker-seg">
+        <button class="active" data-key="hero" data-val="A">A</button>
+        <button data-key="hero" data-val="C">C</button>
+      </div>
+    </div>
+    <div class="picker-group" data-control="modules">
+      <label>Modules</label>
+      <div class="picker-seg">
+        <button class="active" data-key="modules" data-val="A">A</button>
+        <button data-key="modules" data-val="C">C</button>
+      </div>
+    </div>
+    <div class="picker-group" data-control="efa">
+      <label>EFA</label>
+      <div class="picker-seg">
+        <button class="active" data-key="efa" data-val="A">A</button>
+        <button data-key="efa" data-val="C">C</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="picker-right">
+    <span class="combo-label" id="combo-label"></span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      <svg class="sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="picker-hint">
+  16 combinations · 2 pages · click any segmented control to switch · combo also accessible at <code id="hash-readout">#H-A.Hero-A.M-A.EFA-A</code>
+</div>
+
+<!-- =========== LIVE PREVIEW =========== -->
+<main id="preview"></main>
+
+<script>
+  // ====== VARIANT MARKUP ======
+  const V = {
+    header: {
+      A: `<div class="hdr-base hdr-A">
+            <div class="links">
+              <a href="#" class="logo">iTest</a>
+              <a href="#">Modules</a>
+              <a href="#">Tools</a>
+              <a href="#">Docs</a>
+              <a href="#">Support</a>
+            </div>
+            <div class="right">
+              <button class="icon-btn" aria-label="Search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              </button>
+              <button class="icon-btn" aria-label="Account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              </button>
+            </div>
+          </div>`,
+      B: `<div class="hdr-B-wrap">
+            <div class="hdr-B">
+              <span class="mini-logo" style="padding:0 8px 0 6px;">
+                <span class="glyph">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+                </span>
+              </span>
+              <span class="sep"></span>
+              <a class="pill-item active" href="#">Modules</a>
+              <a class="pill-item" href="#">Tools</a>
+              <a class="pill-item" href="#">Docs</a>
+              <a class="pill-item" href="#">Activity</a>
+              <span class="sep"></span>
+              <button class="icon-pill" aria-label="Search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              </button>
+              <button class="icon-pill" aria-label="Account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              </button>
+            </div>
+          </div>`
+    },
+    hero: {
+      A: `<section class="hero">
+            <div class="eyebrow">Intelligent Test R&amp;D Platform</div>
+            <h1>One platform. <span class="grad">Every test workflow.</span></h1>
+            <p class="sub">From condition tables to failure analysis — iTest brings every PTE tool into one place, online, standardized, and instrumented.</p>
+            <div class="actions">
+              <a href="#" class="btn-primary">Get started <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+              <a href="#" class="btn-ghost">Watch overview <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+            </div>
+          </section>`,
+      C: `<section class="hero hero-C">
+            <div class="eyebrow">Intelligent Test R&amp;D Platform</div>
+            <h1>Built for the way <span class="grad">PTE actually ships.</span></h1>
+            <p class="sub">A unified entry point for every test workflow across CXMT — online, standardized, ready to compose.</p>
+            <div class="pills">
+              <span class="pill"><span class="dot"></span>Online editing</span>
+              <span class="pill"><span class="dot"></span>Test plan generation</span>
+              <span class="pill"><span class="dot"></span>Fuse single-source-of-truth</span>
+              <span class="pill"><span class="dot"></span>FSA &amp; PFA analysis</span>
+              <span class="pill"><span class="dot"></span>DC correlation</span>
+              <span class="pill"><span class="dot"></span>Nano probe pipeline</span>
+              <span class="pill"><span class="dot"></span>Test time reduction</span>
+            </div>
+            <a href="#" class="btn-primary">Explore modules <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+          </section>`
+    },
+    modules: {
+      A: `<div class="modules-wrap">
+            <div class="modules-head">
+              <div>
+                <h2>Core Modules</h2>
+                <p class="desc">Seven first-class modules that power the platform.</p>
+              </div>
+              <div class="meta">7 modules</div>
+            </div>
+            <div class="grid-A">
+              <a class="card-A" href="#">
+                <div class="icon-tile grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+                <div>
+                  <h3>Condition Table</h3>
+                  <p>Condition Table Online Editor</p>
+                  <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+                </div>
+              </a>
+              <a class="card-A" href="#">
+                <div class="icon-tile grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></div>
+                <div>
+                  <h3>Fuse-Control Table</h3>
+                  <p>Single source of Fuse information for all products</p>
+                  <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+                </div>
+              </a>
+              <a class="card-A" href="#">
+                <div class="icon-tile grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></div>
+                <div>
+                  <h3>Test Methods</h3>
+                  <p>All patterns you can find here</p>
+                  <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+                </div>
+              </a>
+              <a class="card-A" href="#">
+                <div class="icon-tile grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+                <div>
+                  <h3>Test Management</h3>
+                  <p>Test plans generator</p>
+                  <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+                </div>
+              </a>
+              <a class="card-A" href="#">
+                <div class="icon-tile grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></div>
+                <div>
+                  <h3>TTR</h3>
+                  <p>Test Time Reduction</p>
+                  <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+                </div>
+              </a>
+              <a class="card-A" href="#">
+                <div class="icon-tile grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></div>
+                <div>
+                  <h3>DFT</h3>
+                  <p>Design for Test</p>
+                  <div class="open"><span class="open-label">Open</span><span class="arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span></div>
+                </div>
+              </a>
+              <a class="card-A collection" href="#" data-jump="efa" title="Opens EFA Tools sub-page">
+                <div class="icon-tile grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+                <div class="text-block">
+                  <h3>EFA Tools</h3>
+                  <p>Electrical Failure Analysis toolbox — twelve tools across six categories.</p>
+                </div>
+                <div class="meta-row">
+                  <span class="tool-count">12 tools · 6 categories</span>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></span>
+                </div>
+              </a>
+            </div>
+          </div>`,
+      C: `<div class="modules-wrap">
+            <div class="modules-head">
+              <div>
+                <h2>Modules at a glance</h2>
+                <p class="desc">Featured workflows and supporting tools.</p>
+              </div>
+              <div class="meta">7 modules</div>
+            </div>
+            <div class="bento">
+              <div class="bento-card feat" style="background:linear-gradient(140deg, #0a0a0c 0%, #1d1d1f 100%); color:#f5f5f7; border-color:transparent;">
+                <div class="ic-lg grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+                <div>
+                  <h3>Test Management</h3>
+                  <p style="color:#a1a1a6;">Generate test plans, orchestrate runs, and ship faster across products.</p>
+                  <div style="margin-top:16px;"><a href="#" class="btn-ghost" style="color:#2997ff;">Open Test Management →</a></div>
+                </div>
+              </div>
+              <div class="bento-card">
+                <div class="ic-sm grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+                <div><h3>Condition Table</h3><p>Online editor</p></div>
+              </div>
+              <div class="bento-card">
+                <div class="ic-sm grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></div>
+                <div><h3>Fuse-Control Table</h3><p>Single source of Fuse info</p></div>
+              </div>
+              <div class="bento-card wide">
+                <div class="ic-sm grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></div>
+                <div><h3>Test Methods</h3><p>Every pattern you'll need — curated and version controlled.</p></div>
+              </div>
+              <div class="bento-card">
+                <div class="ic-sm grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></div>
+                <div><h3>TTR</h3><p>Test Time Reduction</p></div>
+              </div>
+              <div class="bento-card">
+                <div class="ic-sm grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></div>
+                <div><h3>DFT</h3><p>Design for Test</p></div>
+              </div>
+              <a class="bento-card wide" href="#" data-jump="efa" style="background: linear-gradient(140deg, var(--surface-2) 0%, var(--surface) 100%);">
+                <div class="ic-sm grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+                <div>
+                  <h3>EFA Tools <span style="font-size:13px;color:var(--muted);font-weight:500;margin-left:8px;">→ sub-page</span></h3>
+                  <p>Electrical Failure Analysis toolbox — 12 tools across SA, LP, DDR, PVA, AV, Anti Fuse.</p>
+                </div>
+              </a>
+            </div>
+          </div>`
+    },
+    efa: {
+      A: `<div class="efa-wrap">
+            <div class="efa-head">
+              <div class="breadcrumb">
+                <a href="#" data-jump="home"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Home</a>
+                <span class="sep">/</span>
+                <span>EFA Tools</span>
+              </div>
+              <h2>EFA Toolbox</h2>
+              <p>Six categories, twelve tools for electrical failure analysis.</p>
+            </div>
+            <div class="seg" id="seg-A">
+              <button class="active" data-seg="SA">SA</button>
+              <button data-seg="LP">EFA LP</button>
+              <button data-seg="DDR">EFA DDR</button>
+              <button data-seg="PVA">PVA</button>
+              <button data-seg="AV">AV</button>
+              <button data-seg="AF">Anti Fuse</button>
+            </div>
+            <div class="efa-grid" data-seg-content="SA">
+              <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Bit line sense amplifier analysis assistant.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+              <a class="tool-card" href="#"><span class="tag">Margin</span><h4>Sense Margin</h4><p>Sense margin report.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            </div>
+            <div class="efa-grid" data-seg-content="LP" style="display:none;">
+              <a class="tool-card" href="#"><span class="tag">Fuse</span><h4>Load Fuse table</h4><p>View dynamic trim code info.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            </div>
+            <div class="efa-grid" data-seg-content="DDR" style="display:none;">
+              <a class="tool-card" href="#"><span class="tag">Viewer</span><h4>Bitview</h4><p>Normal/compress mode fail address &amp; FSA check and analysis.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+              <a class="tool-card" href="#"><span class="tag">Map</span><h4>PFA Tool</h4><p>Map electric address to physical address for PFA analysis.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+              <a class="tool-card" href="#"><span class="tag">Studio</span><h4>Mapstudio</h4><p>Listing analysis data of CP stage.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+              <a class="tool-card" href="#"><span class="tag">Nano</span><h4>Nano Probe Data Analysis</h4><p>Plots, parameters, and reports from nano probe data.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            </div>
+            <div class="efa-grid" data-seg-content="PVA" style="display:none;">
+              <a class="tool-card" href="#"><span class="tag">DC</span><h4>DC Data Analysis</h4><p>Analyze DC data and device correlation.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+              <a class="tool-card" href="#"><span class="tag">Auto</span><h4>One Click</h4><p>Analyze DC data and stage correlation.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            </div>
+            <div class="efa-grid" data-seg-content="AV" style="display:none;">
+              <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Parse normal-mode FSA for fail bit addresses.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+              <a class="tool-card" href="#"><span class="tag">Leak</span><h4>Bit-level Leakage Extraction</h4><p>Per-bit leakage current at specified voltage from CP stage.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            </div>
+            <div class="efa-grid" data-seg-content="AF" style="display:none;">
+              <a class="tool-card" href="#"><span class="tag">Array</span><h4>Fuse Array FSA</h4><p>Check the distribution of the fuse bit map.</p><svg class="arrow-sm" width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6M3 3h6v6"/></svg></a>
+            </div>
+          </div>`,
+      C: `<div class="efa-wrap">
+            <div class="efa-head">
+              <div class="breadcrumb">
+                <a href="#" data-jump="home"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Home</a>
+                <span class="sep">/</span>
+                <span>EFA Tools</span>
+              </div>
+              <h2>EFA Toolbox</h2>
+              <p>All twelve tools at once, grouped by category.</p>
+            </div>
+            <div class="efa-c">
+              <aside class="efa-c-side">
+                <a class="side-link active" href="#"><span class="side-dot" style="background:#00b4d8;"></span>SA<span class="side-count">2</span></a>
+                <a class="side-link" href="#"><span class="side-dot" style="background:#ff9500;"></span>EFA LP<span class="side-count">1</span></a>
+                <a class="side-link" href="#"><span class="side-dot" style="background:#af52de;"></span>EFA DDR<span class="side-count">4</span></a>
+                <a class="side-link" href="#"><span class="side-dot" style="background:#34c759;"></span>PVA<span class="side-count">2</span></a>
+                <a class="side-link" href="#"><span class="side-dot" style="background:#ff3b30;"></span>AV<span class="side-count">2</span></a>
+                <a class="side-link" href="#"><span class="side-dot" style="background:#5856d6;"></span>Anti Fuse<span class="side-count">1</span></a>
+              </aside>
+              <div class="efa-c-main">
+                <h3>SA — Sense Amplifier</h3>
+                <div class="efa-c-grid">
+                  <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Bit line sense amplifier analysis assistant.</p></a>
+                  <a class="tool-card" href="#"><span class="tag">Margin</span><h4>Sense Margin</h4><p>Sense margin report.</p></a>
+                </div>
+                <h3>EFA LP — Low Power</h3>
+                <div class="efa-c-grid">
+                  <a class="tool-card" href="#"><span class="tag">Fuse</span><h4>Load Fuse table</h4><p>View dynamic trim code info.</p></a>
+                </div>
+                <h3>EFA DDR — DDR Memory</h3>
+                <div class="efa-c-grid">
+                  <a class="tool-card" href="#"><span class="tag">Viewer</span><h4>Bitview</h4><p>Normal/compress fail address &amp; FSA.</p></a>
+                  <a class="tool-card" href="#"><span class="tag">Map</span><h4>PFA Tool</h4><p>Electric → physical address mapping.</p></a>
+                  <a class="tool-card" href="#"><span class="tag">Studio</span><h4>Mapstudio</h4><p>CP stage analysis data.</p></a>
+                  <a class="tool-card" href="#"><span class="tag">Nano</span><h4>Nano Probe Data Analysis</h4><p>Plots, parameters, reports.</p></a>
+                </div>
+                <h3>PVA — Parametric / Voltage Analysis</h3>
+                <div class="efa-c-grid">
+                  <a class="tool-card" href="#"><span class="tag">DC</span><h4>DC Data Analysis</h4><p>DC data and device correlation.</p></a>
+                  <a class="tool-card" href="#"><span class="tag">Auto</span><h4>One Click</h4><p>DC data and stage correlation.</p></a>
+                </div>
+                <h3>AV — Address / Voltage</h3>
+                <div class="efa-c-grid">
+                  <a class="tool-card" href="#"><span class="tag">FSA</span><h4>FSA Analysis</h4><p>Normal-mode FSA fail bit addresses.</p></a>
+                  <a class="tool-card" href="#"><span class="tag">Leak</span><h4>Bit-level Leakage Extraction</h4><p>Per-bit leakage current.</p></a>
+                </div>
+                <h3>Anti Fuse — Fuse Array</h3>
+                <div class="efa-c-grid">
+                  <a class="tool-card" href="#"><span class="tag">Array</span><h4>Fuse Array FSA</h4><p>Fuse bit map distribution.</p></a>
+                </div>
+              </div>
+            </div>
+          </div>`
+    },
+    footer: {
+      B: `<footer class="ftr-base ftr-B">
+            <div class="ftr-B-cols">
+              <div class="ftr-B-col brand">
+                <span class="mini-logo">
+                  <span class="glyph">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+                  </span>
+                  iTest
+                </span>
+                <p class="tagline">Intelligent Test R&amp;D Platform — part of the CXMT Workspace ecosystem.</p>
+              </div>
+              <div class="ftr-B-col">
+                <h5>Modules</h5>
+                <ul>
+                  <li><a href="#">Condition Table</a></li>
+                  <li><a href="#">Fuse-Control Table</a></li>
+                  <li><a href="#">Test Methods</a></li>
+                  <li><a href="#">Test Management</a></li>
+                  <li><a href="#">TTR</a></li>
+                  <li><a href="#">DFT</a></li>
+                </ul>
+              </div>
+              <div class="ftr-B-col">
+                <h5>EFA Tools</h5>
+                <ul>
+                  <li><a href="#" data-jump="efa">SA</a></li>
+                  <li><a href="#" data-jump="efa">EFA LP</a></li>
+                  <li><a href="#" data-jump="efa">EFA DDR</a></li>
+                  <li><a href="#" data-jump="efa">PVA</a></li>
+                  <li><a href="#" data-jump="efa">AV</a></li>
+                  <li><a href="#" data-jump="efa">Anti Fuse</a></li>
+                </ul>
+              </div>
+              <div class="ftr-B-col">
+                <h5>Resources</h5>
+                <ul>
+                  <li><a href="#">Documentation</a></li>
+                  <li><a href="#">API Reference</a></li>
+                  <li><a href="#">Changelog</a></li>
+                  <li><a href="#">System Status</a></li>
+                  <li><a href="#">Support</a></li>
+                </ul>
+              </div>
+              <div class="ftr-B-col">
+                <h5>About</h5>
+                <ul>
+                  <li><a href="#">Workspace</a></li>
+                  <li><a href="#">CXMT</a></li>
+                  <li><a href="#">Contact</a></li>
+                  <li><a href="#">Terms</a></li>
+                  <li><a href="#">Privacy</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="ftr-B-bottom">
+              <span>© 2026 CXMT · iTest v1.0 · build 2026.05.24</span>
+              <div class="links">
+                <a href="#">itest.cxmt.com</a>
+                <a href="#">Status</a>
+                <a href="#">Region: CN</a>
+              </div>
+            </div>
+          </footer>`
+    }
+  };
+
+  // ====== STATE ======
+  function readHash() {
+    // hash format: #H-A.Hero-A.M-A.EFA-A or #view=efa&header=B&...
+    const h = location.hash.replace(/^#/, '');
+    if (!h) return null;
+    try {
+      const out = {};
+      h.split('.').forEach(p => {
+        const [k, v] = p.split('-');
+        const keyMap = { H: 'header', Hero: 'hero', M: 'modules', EFA: 'efa', V: 'view' };
+        if (keyMap[k]) out[keyMap[k]] = v;
+      });
+      return Object.keys(out).length ? out : null;
+    } catch { return null; }
+  }
+  function writeHash() {
+    location.hash = `H-${state.header}.Hero-${state.hero}.M-${state.modules}.EFA-${state.efa}.V-${state.view}`;
+  }
+
+  const defaults = { view: 'home', header: 'A', hero: 'A', modules: 'A', efa: 'A' };
+  const stored = JSON.parse(localStorage.getItem('itest-combo') || 'null');
+  const state = Object.assign({}, defaults, stored || {}, readHash() || {});
+
+  // ====== RENDER ======
+  const preview = document.getElementById('preview');
+  function render() {
+    const parts = [V.header[state.header]];
+    if (state.view === 'home') {
+      parts.push(V.hero[state.hero]);
+      parts.push(V.modules[state.modules]);
+    } else {
+      parts.push(V.efa[state.efa]);
+    }
+    parts.push(V.footer.B);
+
+    // Force re-animation
+    preview.style.animation = 'none';
+    void preview.offsetHeight;
+    preview.style.animation = '';
+    preview.innerHTML = parts.join('\n');
+
+    initInteractive();
+    syncPicker();
+    persist();
+  }
+
+  function initInteractive() {
+    // EFA A segmented control
+    const seg = preview.querySelector('#seg-A');
+    if (seg) {
+      seg.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          seg.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const key = btn.dataset.seg;
+          preview.querySelectorAll('[data-seg-content]').forEach(g => {
+            g.style.display = g.dataset.segContent === key ? '' : 'none';
+          });
+        });
+      });
+    }
+
+    // Cross-page jumps (homepage card → EFA, EFA breadcrumb → home)
+    preview.querySelectorAll('[data-jump]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        state.view = el.dataset.jump === 'efa' ? 'efa' : 'home';
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }
+
+  function syncPicker() {
+    document.querySelectorAll('.picker-seg button').forEach(btn => {
+      btn.classList.toggle('active', state[btn.dataset.key] === btn.dataset.val);
+    });
+    // Dim controls that don't affect current view
+    document.querySelectorAll('.picker-group').forEach(g => {
+      const ctrl = g.dataset.control;
+      let dim = false;
+      if (state.view === 'home' && ctrl === 'efa') dim = true;
+      if (state.view === 'efa' && (ctrl === 'hero' || ctrl === 'modules')) dim = true;
+      g.classList.toggle('dim', dim);
+    });
+    // Combo label
+    document.getElementById('combo-label').innerHTML =
+      `H<strong>${state.header}</strong> · Hero<strong>${state.hero}</strong> · M<strong>${state.modules}</strong> · EFA<strong>${state.efa}</strong> · F<strong>B</strong>`;
+    document.getElementById('hash-readout').textContent =
+      `#H-${state.header}.Hero-${state.hero}.M-${state.modules}.EFA-${state.efa}.V-${state.view}`;
+  }
+
+  function persist() {
+    localStorage.setItem('itest-combo', JSON.stringify(state));
+    writeHash();
+  }
+
+  // ====== EVENT BINDINGS ======
+  document.querySelectorAll('.picker-seg button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state[btn.dataset.key] = btn.dataset.val;
+      render();
+    });
+  });
+
+  // Theme toggle
+  const themeBtn = document.getElementById('theme-toggle');
+  const moon = themeBtn.querySelector('.moon');
+  const sun = themeBtn.querySelector('.sun');
+  function syncTheme() {
+    const isDark = document.documentElement.classList.contains('dark');
+    moon.style.display = isDark ? '' : 'none';
+    sun.style.display = isDark ? 'none' : '';
+  }
+  syncTheme();
+  themeBtn.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('itest-theme', isDark ? 'dark' : 'light');
+    syncTheme();
+  });
+
+  // Keyboard shortcuts: 1 = Homepage, 2 = EFA, T = theme
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === '1') { state.view = 'home'; render(); }
+    if (e.key === '2') { state.view = 'efa';  render(); }
+    if (e.key.toLowerCase() === 't') themeBtn.click();
+  });
+
+  // Initial render
+  render();
+</script>
+
+</body>
+</html>
