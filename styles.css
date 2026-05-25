@@ -442,28 +442,43 @@ html.dark .grad-7 { background: linear-gradient(140deg, #6e6e73, #2a2a2c); }
 }
 .site-footer .cols {
   max-width: 1200px; margin: 0 auto;
-  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
-  gap: 40px;
-  padding-bottom: 32px;
+  display: flex; flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px 60px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--border);
 }
-.site-footer .col h5 {
-  font-size: 12px; font-weight: 600;
-  color: var(--text); margin: 0 0 14px;
-  letter-spacing: -0.01em;
+.site-footer .col.brand {
+  flex: 0 0 auto;
+  max-width: 320px;
 }
+/* Hide redundant "Tools" heading — items are self-evident next to brand */
+.site-footer .col:not(.brand) h5 { display: none; }
 .site-footer .col ul {
   list-style: none; padding: 0; margin: 0;
   display: flex; flex-direction: column; gap: 8px;
 }
+/* Tools col: horizontal flex-wrap, right-aligned, takes remaining space */
+.site-footer .col:not(.brand) {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 2px; /* nudge to baseline with the brand logo */
+}
+.site-footer .col:not(.brand) ul {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px 24px;
+}
 .site-footer .col a {
-  font-size: 12px; color: var(--muted);
+  font-size: 13px; color: var(--muted);
   transition: color .15s;
 }
 .site-footer .col a:hover { color: var(--text); }
 .site-footer .col .tagline {
-  font-size: 12px; color: var(--muted);
-  margin-top: 12px; line-height: 1.5; max-width: 220px;
+  font-size: 13px; color: var(--muted);
+  margin-top: 8px; line-height: 1.5;
 }
 .site-footer .bottom {
   max-width: 1200px; margin: 0 auto;
@@ -483,7 +498,6 @@ html.dark .grad-7 { background: linear-gradient(140deg, #6e6e73, #2a2a2c); }
     flex-direction: row; flex-wrap: wrap; position: static;
   }
   .efa-c-grid { grid-template-columns: repeat(2, 1fr); }
-  .site-footer .cols { grid-template-columns: repeat(2, 1fr); }
   .site-header { padding: 0 16px; }
   .site-header .nav-left { gap: 20px; }
   .card-A.collection { flex-direction: column; align-items: flex-start; }
@@ -492,7 +506,6 @@ html.dark .grad-7 { background: linear-gradient(140deg, #6e6e73, #2a2a2c); }
 @media (max-width: 640px) {
   .grid-A { grid-template-columns: 1fr; }
   .efa-c-grid { grid-template-columns: 1fr; }
-  .site-footer .cols { grid-template-columns: 1fr; }
   .hero { padding: 64px 24px; }
   .modules-wrap, .efa-wrap { padding: 40px 24px; }
 }
