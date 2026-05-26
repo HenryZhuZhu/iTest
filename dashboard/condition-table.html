@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Condition Table · Operations · iTest</title>
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="dashboard.css" />
+<script>
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+</head>
+
+<body>
+
+<!-- ====== Shared Header (relative paths back to parent dir) ====== -->
+<header class="site-header">
+  <div class="nav-left">
+    <a href="../index.html" class="brand" aria-label="iTest — back to homepage">iTest</a>
+    <nav class="nav-products">
+      <a href="../index.html#modules" class="nav-link" aria-haspopup="true">
+        Products
+        <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+      </a>
+      <div class="dropdown" role="menu">
+        <a class="dropdown-item" href="../condition-table.html" role="menuitem">
+          <span class="icon-mini grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span>
+          <span class="text"><span class="name">Condition Table</span><span class="desc">Online editor</span></span>
+        </a>
+        <a class="dropdown-item" href="../fuse-control-table.html" role="menuitem">
+          <span class="icon-mini grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></span>
+          <span class="text"><span class="name">Fuse-Control Table</span><span class="desc">Single source of Fuse info</span></span>
+        </a>
+        <a class="dropdown-item" href="../test-methods.html" role="menuitem">
+          <span class="icon-mini grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></span>
+          <span class="text"><span class="name">Test Methods</span><span class="desc">Pattern library</span></span>
+        </a>
+        <a class="dropdown-item" href="../test-management.html" role="menuitem">
+          <span class="icon-mini grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></span>
+          <span class="text"><span class="name">Test Management</span><span class="desc">Test plans generator</span></span>
+        </a>
+        <a class="dropdown-item" href="../ttr.html" role="menuitem">
+          <span class="icon-mini grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></span>
+          <span class="text"><span class="name">TTR</span><span class="desc">Test Time Reduction</span></span>
+        </a>
+        <a class="dropdown-item" href="../dft.html" role="menuitem">
+          <span class="icon-mini grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span>
+          <span class="text"><span class="name">DFT</span><span class="desc">Design for Test</span></span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="../efa-tools.html" role="menuitem">
+          <span class="icon-mini grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+          <span class="text"><span class="name">EFA Tools</span><span class="desc">11 tools · 5 categories</span></span>
+        </a>
+      </div>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ====== Dashboard ====== -->
+<main class="dash-wrap">
+
+  <!-- Head: breadcrumb + title + date range filter -->
+  <div class="dash-head">
+    <div class="title-block">
+      <div class="breadcrumb">
+        <a href="../index.html">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Home
+        </a>
+        <span class="sep">/</span>
+        <span>Dashboard</span>
+        <span class="sep">/</span>
+        <span>Condition Table</span>
+      </div>
+      <h1>Condition Table · Operations</h1>
+      <p class="lede">Who's using the editor, what they're maintaining, and where attention is needed.</p>
+      <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
+        <span class="stream-indicator">
+          <span class="dot"></span>
+          <span>Streaming · <span class="label-bright" id="stream-rate">142</span> events / hr</span>
+        </span>
+        <p class="meta" id="last-updated" style="margin: 0;"></p>
+      </div>
+    </div>
+    <div class="date-filter" role="tablist" aria-label="Date range">
+      <button data-range="today" class="active">Today</button>
+      <button data-range="yesterday">Yesterday</button>
+      <button data-range="7d">7 days</button>
+      <button data-range="30d">30 days</button>
+      <button data-range="90d">90 days</button>
+    </div>
+  </div>
+
+  <!-- ====== Tabs ====== -->
+  <nav class="dash-tabs" role="tablist" aria-label="Dashboard sections">
+    <button data-tab="overview" class="active" role="tab">Overview</button>
+    <button data-tab="activity"            role="tab">Activity</button>
+    <button data-tab="edits"               role="tab">Edits</button>
+    <button data-tab="programs"            role="tab">Programs</button>
+  </nav>
+
+  <!-- ====== Tab: Overview ====== -->
+  <div class="tab-content" data-tab="overview">
+
+    <!-- §1 KPI strip (Req 2 traffic + Req 3 usage depth) -->
+    <section class="dash-section" style="margin-top: 0;">
+      <div class="kpi-strip" id="kpi-strip"></div>
+    </section>
+
+    <!-- §2 Team coverage by department (Req 4 + 8) — click a dept to see its members + products -->
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Team Coverage</h2>
+        <p class="hint">Click a department to see its members and the products they maintain</p>
+      </div>
+      <div class="coverage-split">
+        <div class="coverage-grid" id="coverage-grid"></div>
+        <div class="member-panel">
+          <div class="mp-head">
+            <h3>Members <span class="scope" id="mp-scope">—</span></h3>
+            <span class="mp-count" id="mp-count"></span>
+          </div>
+          <div class="mp-list" id="mp-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §3 Dormant users + Unattended products (Req 4) -->
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Needs Attention</h2>
+        <p class="hint">Users who haven't logged in · products with no maintainer</p>
+      </div>
+      <div class="two-col">
+        <div class="list-card">
+          <div class="list-head">
+            <h3>Dormant Users (30 d+)</h3>
+            <span class="count-badge" id="dormant-count">0</span>
+          </div>
+          <div class="list-items" id="dormant-list"></div>
+        </div>
+        <div class="list-card">
+          <div class="list-head">
+            <h3>Unattended Products</h3>
+            <span class="count-badge" id="unattended-count">0</span>
+          </div>
+          <div class="list-items" id="unattended-list"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ====== Tab: Activity ====== -->
+  <div class="tab-content" data-tab="activity" hidden>
+
+    <!-- §4 Daily activity table (Req 5 + 6) — cascades with date filter -->
+    <section class="dash-section" style="margin-top: 0;">
+      <div class="dash-section-head">
+        <h2 id="activity-heading">Today's Activity</h2>
+        <p class="hint" id="activity-hint">Per-user: products being maintained, test sites, edit count</p>
+      </div>
+      <div class="activity-card">
+        <div class="activity-toolbar">
+          <input type="search" id="activity-search" placeholder="Search by name, department, product…" />
+          <select id="activity-dept-filter">
+            <option value="">All departments</option>
+          </select>
+          <select id="activity-site-filter">
+            <option value="">All sites</option>
+            <option value="CP">CP</option>
+            <option value="RDBI">RDBI</option>
+            <option value="FT">FT</option>
+          </select>
+          <span class="toolbar-count" id="activity-count"></span>
+        </div>
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Department</th>
+              <th id="th-products">Products today</th>
+              <th>Sites</th>
+              <th style="text-align: right;" id="th-edits">Edits</th>
+            </tr>
+          </thead>
+          <tbody id="activity-body"></tbody>
+        </table>
+        <div class="table-pager">
+          <button id="page-prev">← Prev</button>
+          <span class="page-info" id="page-info"></span>
+          <button id="page-next">Next →</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ====== Tab: Edits ====== -->
+  <div class="tab-content" data-tab="edits" hidden>
+
+    <!-- §5 + §6 Hot columns + Hot intents (Req 6 + 7) -->
+    <section class="dash-section" style="margin-top: 0;">
+      <div class="dash-section-head">
+        <h2>What's Being Edited</h2>
+        <p class="hint">Most-touched columns and the intent behind each edit</p>
+      </div>
+      <div class="bar-row">
+        <div class="bar-card">
+          <h3>Most Edited Columns</h3>
+          <p class="sub">Top 14 columns, last 7 days</p>
+          <div class="bar-list" id="columns-list"></div>
+        </div>
+        <div class="bar-card">
+          <h3>Top Edit Intents</h3>
+          <p class="sub">User-tagged intent on each cell modification</p>
+          <div class="bar-list" id="intents-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §7 Interaction hotspot (Req 1) -->
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Interaction Hotspot</h2>
+        <p class="hint">Where clicks concentrate inside the editor canvas</p>
+      </div>
+      <div class="hotspot-card">
+        <div class="hotspot-head">
+          <h3>Click density · Condition Table editor</h3>
+          <a class="or-link" href="#" id="openreplay-link">
+            View live heatmap in OpenReplay
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+          </a>
+        </div>
+        <div class="hotspot-canvas" id="hotspot-canvas">
+          <div class="grid-bg"></div>
+          <div class="hh" id="hotspot-header"></div>
+        </div>
+        <div class="hotspot-legend">
+          <span><span class="swatch lvl-1"></span>High</span>
+          <span><span class="swatch lvl-2"></span>Medium</span>
+          <span><span class="swatch lvl-3"></span>Low</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ====== Tab: Programs ====== -->
+  <div class="tab-content" data-tab="programs" hidden>
+
+    <!-- §8 Product update velocity — tick timeline (hover a tick for interval + author) -->
+    <section class="dash-section" style="margin-top: 0;">
+      <div class="dash-section-head">
+        <h2>Product Update Velocity</h2>
+        <p class="hint">Each tick is one program version. Hover to see who shipped it and the interval to the previous / next update.</p>
+      </div>
+      <div class="velocity-grid" id="velocity-grid-a"></div>
+    </section>
+
+    <!-- §9 Recent program changes — version-to-version cell diffs -->
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Recent Program Changes</h2>
+        <p class="hint">Cell-level diff between the latest version and its predecessor</p>
+      </div>
+      <div class="diff-stream" id="diff-stream"></div>
+    </section>
+
+  </div>
+
+</main>
+
+<!-- ====== Footer (reused) ====== -->
+<footer class="site-footer">
+  <div class="cols">
+    <div class="col brand">
+      <span class="mini-logo">
+        <span class="glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg>
+        </span>
+        iTest
+      </span>
+      <p class="tagline">Brings every PTE tool into one place, online, standardized, and instrumented.</p>
+    </div>
+    <div class="col">
+      <h5>Tools</h5>
+      <ul>
+        <li><a href="../condition-table.html">Condition Table</a></li>
+        <li><a href="../fuse-control-table.html">Fuse-Control Table</a></li>
+        <li><a href="../test-methods.html">Test Methods</a></li>
+        <li><a href="../test-management.html">Test Management</a></li>
+        <li><a href="../ttr.html">TTR</a></li>
+        <li><a href="../dft.html">DFT</a></li>
+        <li><a href="../efa-tools.html">EFA Tools</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom">
+    <span>© 2026 CXMT · iTest v1.0 · build 2026.05.26</span>
+  </div>
+</footer>
+
+<!-- ====== Theme toggle (shared pattern) ====== -->
+<script>
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const root = document.documentElement;
+    root.classList.toggle('dark');
+    localStorage.setItem('itest-theme', root.classList.contains('dark') ? 'dark' : 'light');
+  });
+</script>
+
+<!-- ====== Mock data → swap with API later ====== -->
+<script src="mock-data.js"></script>
+<script src="dashboard.js"></script>
+
+<!-- ====== OpenReplay (also tracks dashboard usage) ====== -->
+<script type="module" src="../analytics.js"></script>
+
+</body>
+</html>
