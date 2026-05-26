@@ -24,6 +24,17 @@ All four `open` paths are pre-allowed in `.claude/settings.local.json`.
 | `index.html` | **live** | Homepage — Header A · Hero A · Tools grid (Modules A) · Footer B |
 | `efa-tools.html` | **live** | EFA sub-page — Header A · EFA C (sidebar + grid) · Footer B |
 | `styles.css` | **live** | Shared design system used by every live page |
+| `analytics.js` | **live** | OpenReplay tracker bootstrap + iTest event bindings; included as `<script type="module">` on every live page. Fill in `PROJECT_KEY` / `INGEST_POINT` once OpenReplay is deployed. See `Monitoring.md`. |
+| `Design.md` | docs | Reusable Apple-style design system spec (drop into other projects) |
+| `Monitoring.md` | docs | Self-hosted OpenReplay / PostHog setup + integration guide |
+| `User.md` | docs | Department / sub-department headcount (137 users across 6 top-level depts) — authoritative source for dashboard rollups |
+| `dashboard/condition-table.html` | **live** | Ops dashboard for Condition Table — KPI + team coverage + dormant users + unattended products + daily activity + hot columns + intents + interaction hotspot. Reuses `../styles.css` + own `dashboard.css`. Mock data lives in `mock-data.js`. |
+| `dashboard/dashboard.css` | **live** | Dashboard-specific components (KPI tile, coverage card, bar chart, activity table, site chips, heatmap placeholder) |
+| `dashboard/dashboard.js` | **live** | Render functions per section; reads `window.MOCK`. Swap mock reads for `fetch()` when APIs land. |
+| `dashboard/mock-data.js` | **live** | Mock data (departments from User.md, 131 users, 14 products, 14 columns, 10 intents) + `getUserDetail(id)` helper that synthesizes per-user breakdowns (products, columns, intents, 14-day history, sessions). Replace once OpenReplay + Condition Table backend APIs are wired up. |
+| `dashboard/user.html` | **live** | Single-user detail page — opened via `user.html?id=usr-XYZ` from any clickable username on the dashboard. Header card · KPI strip · products maintained · 14-day edit history · per-user hot columns/intents · recent sessions. |
+| `dashboard/user.js` | **live** | Renders user detail page from `MOCK.getUserDetail()`. Falls back to a friendly "User not found" panel when the id query param is missing or invalid. |
+| `dashboard/tv.html` + `tv.css` + `tv.js` | **live** | **TV wall display** — full-screen single-view dashboard for always-on big-screen viewing. Forces dark mode. Top bar (logo · live clock · LIVE indicator) + 2×2 glass panels: Today's Pulse (hero KPIs) · Team Coverage · Live Activity Feed (auto-cycling, new event every ~4s) · What's Hot (top columns + intents, ranks shuffle every 30s). Zero interaction expected; everything updates on timers. |
 | **Tool detail pages (16)** | **live** | One page per tool, all using the same template (see below) |
 | `variations.html` | reference | Design gallery showing the 14 variations across 5 sections that were used to pick the current combo |
 | `combos.html` | reference | Interactive switcher that lets you preview any of the 16 selected combinations |
