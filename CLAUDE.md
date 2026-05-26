@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project is
 
-**iTest** — Portal page Demo for CXMT's **Intelligent PTE Tool Platform** (测试智能研发平台, `itest.cxmt.com`). It's a static HTML demo, **no build system, no package manager, no tests**. Open the HTML files directly in a browser. The homepage aggregates 7 first-class tools; one of them (EFA Tools) is a "collection" entry that links to a dedicated sub-page hosting 12 sub-tools across 6 categories.
+**iTest** — Portal page Demo for CXMT's **Intelligent PTE Tool Platform** (测试智能研发平台, `itest.cxmt.com`). It's a static HTML demo, **no build system, no package manager, no tests**. Open the HTML files directly in a browser. The homepage aggregates 7 first-class tools; one of them (EFA Tools) is a "collection" entry that links to a dedicated sub-page hosting 11 sub-tools across 5 categories.
 
 ## Commands
 
@@ -21,19 +21,58 @@ All four `open` paths are pre-allowed in `.claude/settings.local.json`.
 
 | File | Status | What it is |
 |---|---|---|
-| `index.html` | **live** | Final homepage — Header A · Hero A · Tools grid (Modules A) · Footer B |
-| `efa-tools.html` | **live** | Final EFA sub-page — Header A · EFA C (sidebar + grid) · Footer B |
-| `styles.css` | **live** | Shared design system used by both live pages |
+| `index.html` | **live** | Homepage — Header A · Hero A · Tools grid (Modules A) · Footer B |
+| `efa-tools.html` | **live** | EFA sub-page — Header A · EFA C (sidebar + grid) · Footer B |
+| `styles.css` | **live** | Shared design system used by every live page |
+| **Tool detail pages (16)** | **live** | One page per tool, all using the same template (see below) |
 | `variations.html` | reference | Design gallery showing the 14 variations across 5 sections that were used to pick the current combo |
 | `combos.html` | reference | Interactive switcher that lets you preview any of the 16 selected combinations |
 | `index.v0.html` | backup | Tailwind-era one-page draft; cyan→violet gradient palette, mixed CN/EN — predecessor to the current `index.html`, do not edit |
 
-When the user references "the portal" or design tweaks, **edit `index.html` + `efa-tools.html` (with CSS in `styles.css`)** — the live pair. The variation gallery and combo picker are frozen artifacts of the selection process; reuse them as a source of reference markup when the user wants to swap in a different variation.
+**Tool detail pages** (slug = filename minus `.html`):
+
+| Tool | File | Source category | Icon class |
+|---|---|---|---|
+| Condition Table | `condition-table.html` | Product | `grad-1` |
+| Fuse-Control Table | `fuse-control-table.html` | Product | `grad-2` |
+| Test Methods | `test-methods.html` | Product | `grad-3` |
+| Test Management | `test-management.html` | Product | `grad-4` |
+| TTR | `ttr.html` | Product | `grad-5` |
+| DFT | `dft.html` | Product | `grad-6` |
+| FSA Analysis | `fsa-analysis.html` | EFA → Common | `grad-1` |
+| Sense Margin | `sense-margin.html` | EFA → Common | `grad-1` |
+| Load Fuse table | `load-fuse-table.html` | EFA → EFA | `grad-3` |
+| Bitview | `bitview.html` | EFA → EFA | `grad-3` |
+| PFA Tool | `pfa-tool.html` | EFA → EFA | `grad-3` |
+| Mapstudio | `mapstudio.html` | EFA → EFA | `grad-3` |
+| Nano Probe Data Analysis | `nano-probe-data-analysis.html` | EFA → EFA | `grad-3` |
+| DC Data Analysis | `dc-data-analysis.html` | EFA → DC | `grad-4` |
+| One Click | `one-click.html` | EFA → DC | `grad-4` |
+| Bit-level Leakage Extraction | `bit-level-leakage-extraction.html` | EFA → AV | `grad-5` |
+| Fuse Array FSA | `fuse-array-fsa.html` | EFA → Anti Fuse | `grad-6` |
+
+When the user references "the portal" or design tweaks, **edit the live HTML files + `styles.css`**. The variation gallery and combo picker are frozen artifacts of the selection process; reuse them as a source of reference markup if the user wants to swap in a different variation.
+
+## Tool detail page template
+
+Every tool detail page follows the same structure (see `condition-table.html` as the canonical example):
+
+1. **Shared header** — brand · Products dropdown · theme toggle · account icon
+2. **Page header** (`.efa-wrap > .efa-head`) — breadcrumb · `<h2>` title · description · single primary CTA
+3. **Preview block** (`.tool-preview`) — 16:9 macOS-window mockup with `.preview-chrome` (traffic lights + monospace title), `.preview-canvas` (grid pattern), `.preview-cell` (active-cell highlight). Replace inner with `<img>` / `<video>` later.
+4. **Statement section** (`.statement-section`) — single editorial pull-line with gradient highlight on key phrase
+5. **Capabilities bento** (`.feature-grid` with one `.featured` 2×2 + two `.feature-card` + one `.wide`)
+6. **Use case** (`.use-case-grid` — left meta-label / right pull-paragraph)
+7. **Related tools** (`.related-grid` with three `.related-card` links)
+8. **Shared footer** — brand + Tools list (7 links, all wired)
+9. **Bottom script** — theme toggle sync + `IntersectionObserver` for `.reveal` scroll-fade
+
+Cross-page wiring: homepage card → tool page; nav dropdown items → tool pages; footer Tools list → tool pages. EFA tool cards on `efa-tools.html` → individual EFA tool pages. Breadcrumb on each EFA tool page goes back to `efa-tools.html`; breadcrumb on each Product page goes back to `index.html`.
 
 ## Architecture & navigation
 
 - **Homepage** (`index.html`) = sticky header + Hero + "Tools" grid + Footer. The grid shows 6 products as equal cards plus a 7th full-width "collection" card for EFA Tools that links to `efa-tools.html`.
-- **EFA sub-page** (`efa-tools.html`) = same header/footer + breadcrumb "Home / EFA Tools" + sticky category sidebar + per-category tool grids. The breadcrumb's "Home" link goes back to `index.html`. Section anchors `#SA #LP #DDR #PVA #AV #AF` allow footer deep-links from the homepage.
+- **EFA sub-page** (`efa-tools.html`) = same header/footer + breadcrumb "Home / EFA Tools" + sticky category sidebar + per-category tool grids. The breadcrumb's "Home" link goes back to `index.html`. Section anchors are `#Common #EFA #DC #AV #AF`.
 - **Header nav** (left → right): `iTest` brand (logo placeholder, links to homepage) · `Products` link with **hover-triggered dropdown** listing all 7 entries (6 products → `#` placeholders, then a divider, then EFA Tools → `efa-tools.html`) · theme toggle · account icon.
 
 ### Terminology — three labels, used deliberately
@@ -67,15 +106,12 @@ Interactive scripts are inline at the bottom of each HTML file (not in a separat
 6. DFT — Design for Test
 7. **EFA Tools** — collection entry → `efa-tools.html`
 
-EFA Tools sub-page categories (12 tools total):
-- **SA** (2): FSA Analysis, Sense Margin
-- **EFA LP** (1): Load Fuse table
-- **EFA DDR** (4): Bitview, PFA Tool, Mapstudio, Nano Probe Data Analysis
-- **PVA** (2): DC Data Analysis, One Click
-- **AV** (2): FSA Analysis, Bit-level Leakage Extraction
+EFA Tools sub-page categories (5 categories, 11 tools total):
+- **Common** (2): FSA Analysis, Sense Margin
+- **EFA** (5): Load Fuse table, Bitview, PFA Tool, Mapstudio, Nano Probe Data Analysis
+- **DC** (2): DC Data Analysis, One Click
+- **AV** (1): Bit-level Leakage Extraction
 - **Anti Fuse** (1): Fuse Array FSA
-
-The same name "FSA Analysis" appears under both SA and AV — they are different tools; preserve the category context.
 
 ## Style direction (current)
 

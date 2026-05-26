@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Load Fuse table · iTest</title>
+<link rel="stylesheet" href="styles.css" />
+<script>
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="nav-left">
+    <a href="index.html" class="brand" aria-label="iTest — back to homepage">iTest</a>
+    <nav class="nav-products">
+      <a href="index.html#modules" class="nav-link" aria-haspopup="true">
+        Products
+        <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+      </a>
+      <div class="dropdown" role="menu">
+        <a class="dropdown-item" href="condition-table.html" role="menuitem"><span class="icon-mini grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span><span class="text"><span class="name">Condition Table</span><span class="desc">Online editor</span></span></a>
+        <a class="dropdown-item" href="fuse-control-table.html" role="menuitem"><span class="icon-mini grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></span><span class="text"><span class="name">Fuse-Control Table</span><span class="desc">Single source of Fuse info</span></span></a>
+        <a class="dropdown-item" href="test-methods.html" role="menuitem"><span class="icon-mini grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></span><span class="text"><span class="name">Test Methods</span><span class="desc">Pattern library</span></span></a>
+        <a class="dropdown-item" href="test-management.html" role="menuitem"><span class="icon-mini grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></span><span class="text"><span class="name">Test Management</span><span class="desc">Test plans generator</span></span></a>
+        <a class="dropdown-item" href="ttr.html" role="menuitem"><span class="icon-mini grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></span><span class="text"><span class="name">TTR</span><span class="desc">Test Time Reduction</span></span></a>
+        <a class="dropdown-item" href="dft.html" role="menuitem"><span class="icon-mini grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span><span class="text"><span class="name">DFT</span><span class="desc">Design for Test</span></span></a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="efa-tools.html" role="menuitem"><span class="icon-mini grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="text"><span class="name">EFA Tools</span><span class="desc">11 tools · 5 categories</span></span></a>
+      </div>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      <svg class="sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+  </div>
+</header>
+
+<section class="page-shell efa-wrap">
+  <div class="efa-head">
+    <div class="breadcrumb">
+      <a href="efa-tools.html"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>EFA Tools</a>
+      <span class="sep">/</span>
+      <span>Load Fuse table</span>
+    </div>
+    <h2>Load Fuse table</h2>
+    <p>View, audit, and trace dynamic trim codes — what was loaded, when, by which test program, on which silicon.</p>
+    <div class="actions" style="margin-top: 28px; justify-content: flex-start;">
+      <a href="#" class="btn-primary">Open loader<svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<section class="page-shell" style="padding: 0 32px 24px;">
+  <div class="tool-preview" style="margin: 0 auto;" aria-hidden="true">
+    <div class="preview-chrome">
+      <span class="tl-dot tl-r"></span><span class="tl-dot tl-y"></span><span class="tl-dot tl-g"></span>
+      <span class="preview-title">load-fuse · trim audit</span>
+    </div>
+    <div class="preview-canvas"></div>
+    <div class="preview-cell"></div>
+  </div>
+</section>
+
+<section class="statement-section reveal">
+  <p class="statement">Every trim code. <em>Audited and traced.</em></p>
+</section>
+
+<section class="tool-section tool-page reveal">
+  <div class="section-eyebrow">Capabilities</div>
+  <h2>Trim-code visibility, end to end.</h2>
+  <div class="feature-grid">
+    <div class="feature-card featured">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+      <h3>Decode dynamic trim per die, per test.</h3>
+      <p>See exactly what loaded — by die, by tester, by program revision. The kind of audit trail that used to require a forensic dig.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+      <h3>Cross-reference Fuse-Control.</h3>
+      <p>Compare loaded vs specified trim, instantly.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+      <h3>Filter by wafer, lot, condition.</h3>
+      <p>Slice the data however you need.</p>
+    </div>
+    <div class="feature-card wide">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+      <h3>Catch trim-code drift across silicon spins.</h3>
+      <p>Early signal for silicon-level issues — when loaded trims start trending away from their nominal values, Load Fuse table surfaces the drift before it becomes a yield problem.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tool-section tool-page reveal">
+  <div class="use-case-grid">
+    <div>
+      <div class="meta-label">Built for</div>
+      <p style="font-size:13px; color:var(--muted); margin:12px 0 0; line-height:1.6;">EFA engineers debugging silicon behavior, characterization leads chasing trim-related anomalies, and program owners auditing what's actually shipping.</p>
+    </div>
+    <p class="body">Trim values are the silent variable behind half of the "why didn't this die pass?" investigations. Load Fuse table makes them <strong>visible by default</strong> — no extra logging, no special test mode, just a click.</p>
+  </div>
+</section>
+
+<section class="tool-section tool-page reveal">
+  <div class="section-eyebrow">Related</div>
+  <h2 style="font-size:clamp(20px, 2.2vw, 28px); margin-bottom: 28px;">Works alongside</h2>
+  <div class="related-grid">
+    <a class="related-card" href="fuse-control-table.html">
+      <div class="ic-sm grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></div>
+      <div class="info"><h4>Fuse-Control Table</h4><p>The spec being compared against.</p></div>
+    </a>
+    <a class="related-card" href="bitview.html">
+      <div class="ic-sm grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="info"><h4>Bitview</h4><p>Confirm fail addresses against loaded trims.</p></div>
+    </a>
+    <a class="related-card" href="fuse-array-fsa.html">
+      <div class="ic-sm grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+      <div class="info"><h4>Fuse Array FSA</h4><p>Programmed-bit map for anti-fuse arrays.</p></div>
+    </a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="cols">
+    <div class="col brand">
+      <span class="mini-logo"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg></span>iTest</span>
+      <p class="tagline">Brings every PTE tool into one place, online, standardized, and instrumented.</p>
+    </div>
+    <div class="col">
+      <h5>Tools</h5>
+      <ul>
+        <li><a href="condition-table.html">Condition Table</a></li>
+        <li><a href="fuse-control-table.html">Fuse-Control Table</a></li>
+        <li><a href="test-methods.html">Test Methods</a></li>
+        <li><a href="test-management.html">Test Management</a></li>
+        <li><a href="ttr.html">TTR</a></li>
+        <li><a href="dft.html">DFT</a></li>
+        <li><a href="efa-tools.html">EFA Tools</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom"><span>© 2026 CXMT · iTest v1.0 · build 2026.05.26</span></div>
+</footer>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  const moon = btn.querySelector('.moon'), sun = btn.querySelector('.sun');
+  function sync() { const isDark = document.documentElement.classList.contains('dark'); moon.style.display = isDark ? '' : 'none'; sun.style.display = isDark ? 'none' : ''; }
+  sync();
+  btn.addEventListener('click', () => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('itest-theme', isDark ? 'dark' : 'light'); sync(); });
+  const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); } }), { threshold: 0.1, rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

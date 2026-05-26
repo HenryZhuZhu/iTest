@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTR · iTest</title>
+<link rel="stylesheet" href="styles.css" />
+<script>
+  (function () {
+    const stored = localStorage.getItem('itest-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="nav-left">
+    <a href="index.html" class="brand" aria-label="iTest — back to homepage">iTest</a>
+    <nav class="nav-products">
+      <a href="index.html#modules" class="nav-link" aria-haspopup="true">
+        Products
+        <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+      </a>
+      <div class="dropdown" role="menu">
+        <a class="dropdown-item" href="condition-table.html" role="menuitem"><span class="icon-mini grad-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span><span class="text"><span class="name">Condition Table</span><span class="desc">Online editor</span></span></a>
+        <a class="dropdown-item" href="fuse-control-table.html" role="menuitem"><span class="icon-mini grad-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/></svg></span><span class="text"><span class="name">Fuse-Control Table</span><span class="desc">Single source of Fuse info</span></span></a>
+        <a class="dropdown-item" href="test-methods.html" role="menuitem"><span class="icon-mini grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></span><span class="text"><span class="name">Test Methods</span><span class="desc">Pattern library</span></span></a>
+        <a class="dropdown-item" href="test-management.html" role="menuitem"><span class="icon-mini grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></span><span class="text"><span class="name">Test Management</span><span class="desc">Test plans generator</span></span></a>
+        <a class="dropdown-item" href="ttr.html" role="menuitem"><span class="icon-mini grad-5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 21v-2"/></svg></span><span class="text"><span class="name">TTR</span><span class="desc">Test Time Reduction</span></span></a>
+        <a class="dropdown-item" href="dft.html" role="menuitem"><span class="icon-mini grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span><span class="text"><span class="name">DFT</span><span class="desc">Design for Test</span></span></a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="efa-tools.html" role="menuitem"><span class="icon-mini grad-7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="text"><span class="name">EFA Tools</span><span class="desc">11 tools · 5 categories</span></span></a>
+      </div>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      <svg class="sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+  </div>
+</header>
+
+<section class="page-shell efa-wrap">
+  <div class="efa-head">
+    <div class="breadcrumb">
+      <a href="index.html"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Home</a>
+      <span class="sep">/</span>
+      <span>TTR</span>
+    </div>
+    <h2>TTR — Test Time Reduction</h2>
+    <p>Squeeze every wasted millisecond out of your test programs. Profile, optimize, and validate — then push back to production.</p>
+    <div class="actions" style="margin-top: 28px; justify-content: flex-start;">
+      <a href="#" class="btn-primary">Analyze a program<svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2l4 4-4 4"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<section class="page-shell" style="padding: 0 32px 24px;">
+  <div class="tool-preview" style="margin: 0 auto;" aria-hidden="true">
+    <div class="preview-chrome">
+      <span class="tl-dot tl-r"></span><span class="tl-dot tl-y"></span><span class="tl-dot tl-g"></span>
+      <span class="preview-title">ttr · profile run #2841</span>
+    </div>
+    <div class="preview-canvas"></div>
+    <div class="preview-cell"></div>
+  </div>
+</section>
+
+<section class="statement-section reveal">
+  <p class="statement">Every millisecond counts. <em>Reclaim them all.</em></p>
+</section>
+
+<section class="tool-section tool-page reveal">
+  <div class="section-eyebrow">Capabilities</div>
+  <h2>Profile, optimize, validate, ship.</h2>
+  <div class="feature-grid">
+    <div class="feature-card featured">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
+      <h3>Profile every test step.</h3>
+      <p>Microsecond-resolution timing on every operation in the program. See exactly where time goes, ranked by potential savings. The bottleneck is rarely where you'd guess.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <h3>Suggest parallelization.</h3>
+      <p>Auto-detect test segments that can run concurrently.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+      <h3>Compare to baselines.</h3>
+      <p>Track regressions across silicon spins, flag anomalies.</p>
+    </div>
+    <div class="feature-card wide">
+      <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+      <h3>Push optimized programs back to Test Management.</h3>
+      <p>Closed-loop. The optimized program lands as a new revision in Test Management — fully traced back to the profile run that produced it.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tool-section tool-page reveal">
+  <div class="use-case-grid">
+    <div>
+      <div class="meta-label">Built for</div>
+      <p style="font-size:13px; color:var(--muted); margin:12px 0 0; line-height:1.6;">PTE engineers chasing cost-per-die targets, and program owners under pressure from manufacturing to shave seconds off insertion time.</p>
+    </div>
+    <p class="body">A 200ms reduction across one million units a quarter is real money. TTR makes those reductions <strong>visible, suggested, and verifiable</strong> — no more guess-and-check time-shaving runs.</p>
+  </div>
+</section>
+
+<section class="tool-section tool-page reveal">
+  <div class="section-eyebrow">Related</div>
+  <h2 style="font-size:clamp(20px, 2.2vw, 28px); margin-bottom: 28px;">Works alongside</h2>
+  <div class="related-grid">
+    <a class="related-card" href="test-methods.html">
+      <div class="ic-sm grad-3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M8 18h8M6 8v8M18 8v8"/></svg></div>
+      <div class="info"><h4>Test Methods</h4><p>Source of the patterns TTR profiles.</p></div>
+    </a>
+    <a class="related-card" href="test-management.html">
+      <div class="ic-sm grad-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+      <div class="info"><h4>Test Management</h4><p>Where optimized plans land as new revisions.</p></div>
+    </a>
+    <a class="related-card" href="dft.html">
+      <div class="ic-sm grad-6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></div>
+      <div class="info"><h4>DFT</h4><p>Designs that test faster — coverage from day one.</p></div>
+    </a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="cols">
+    <div class="col brand">
+      <span class="mini-logo"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16M9 4v16M4 9h5M4 14h5M4 19h5"/></svg></span>iTest</span>
+      <p class="tagline">Brings every PTE tool into one place, online, standardized, and instrumented.</p>
+    </div>
+    <div class="col">
+      <h5>Tools</h5>
+      <ul>
+        <li><a href="condition-table.html">Condition Table</a></li>
+        <li><a href="fuse-control-table.html">Fuse-Control Table</a></li>
+        <li><a href="test-methods.html">Test Methods</a></li>
+        <li><a href="test-management.html">Test Management</a></li>
+        <li><a href="ttr.html">TTR</a></li>
+        <li><a href="dft.html">DFT</a></li>
+        <li><a href="efa-tools.html">EFA Tools</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom"><span>© 2026 CXMT · iTest v1.0 · build 2026.05.26</span></div>
+</footer>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  const moon = btn.querySelector('.moon'), sun = btn.querySelector('.sun');
+  function sync() { const isDark = document.documentElement.classList.contains('dark'); moon.style.display = isDark ? '' : 'none'; sun.style.display = isDark ? 'none' : ''; }
+  sync();
+  btn.addEventListener('click', () => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('itest-theme', isDark ? 'dark' : 'light'); sync(); });
+  const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); } }), { threshold: 0.1, rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
